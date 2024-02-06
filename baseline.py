@@ -67,8 +67,8 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
   model = Baseline()
   model.to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
-  metric = BinaryJaccardIndex()
-  criterion = DiceLoss()
+  metric = BinaryJaccardIndex().to(DEVICE)
+  criterion = DiceLoss().to(DEVICE)
   for e in range(num_epochs):
     model.train()
     train_loss = 0
