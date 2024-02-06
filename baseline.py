@@ -57,12 +57,15 @@ class DiceLoss(nn.Module):
     # inputs = F.sigmoid(inputs)       
     
     #flatten label and prediction tensors
+    print('Dice Loss')
     inputs = inputs.view(-1)
     targets = targets.view(-1)
-    
+    print(inputs)
+    print(targets)
     intersection = (inputs * targets).sum()                            
+    print(intersection)
     dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
-    
+    print(dice)
     return 1 - dice
 
 
@@ -101,8 +104,8 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
         valid_iou += iou.detach().item()
     
     print(f'Epoch: {e}')
-    print(f'Train loss:      {train_loss / len(train_dataloaer)}')
-    print(f'Validation loss: {valid_loss / len(validation_dataloader)}')
+    print(f'Train loss:      {train_loss}')
+    print(f'Validation loss: {valid_loss}')
     print(f'Train intersection over union:      {train_iou}')
     print(f'Validation intersection over union: {valid_iou}')
   torch.save(model.state_dict(), 'baseline_model')
