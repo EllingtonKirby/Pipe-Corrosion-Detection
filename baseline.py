@@ -79,9 +79,9 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
       optimizer.zero_grad()
       output = model(input)
       loss = criterion(output, labels)
-      train_loss += loss.item()
+      train_loss += loss.detach().item()
       iou = metric(output, labels)
-      train_iou += iou
+      train_iou += iou.detach().item()
       loss.backward()
       optimizer.step()
 
@@ -95,8 +95,8 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
         out = model(input)
         loss = criterion(out, labels)
         iou = metric(out, labels)
-        valid_loss += loss
-        valid_iou += iou
+        valid_loss += loss.detach().item()
+        valid_iou += iou.detach().item()
     
     print(f'Epoch: {e}')
     print(f'Train loss:      {train_loss / len(train_dataloaer)}')
