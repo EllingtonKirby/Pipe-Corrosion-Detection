@@ -56,15 +56,10 @@ class DiceLoss(nn.Module):
     # inputs = F.sigmoid(inputs)       
     
     #flatten label and prediction tensors
-    print('Dice Loss')
     inputs = inputs.view(-1)
     targets = targets.view(-1)
-    print("Inputs ", inputs.sum())
-    print("Targets ", targets.sum())
     intersection = (inputs * targets).sum()                            
-    print("Intersection ", intersection)
     dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
-    print("Dice ", dice)
     return 1 - dice
 
 
