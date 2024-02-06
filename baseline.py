@@ -59,20 +59,20 @@ class DiceLoss(nn.Module):
     print('Dice Loss')
     inputs = inputs.view(-1)
     targets = targets.view(-1)
-    print(inputs)
-    print(targets)
+    print("Inputs ", inputs)
+    print("Targets ", targets)
     intersection = (inputs * targets).sum()                            
-    print(intersection)
+    print("Intersection ", intersection)
     dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
-    print(dice)
+    print("Dice ", dice)
     return 1 - dice
 
 
 def train(train_dataloaer, validation_dataloader, num_epochs, lr):
   model = Baseline().to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
-  metric = BinaryJaccardIndex()
-  criterion = DiceLoss()
+  metric = BinaryJaccardIndex().to(DEVICE)
+  criterion = DiceLoss().to(DEVICE)
   for e in range(num_epochs):
     model.train()
     train_loss = 0
