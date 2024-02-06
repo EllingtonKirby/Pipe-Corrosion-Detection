@@ -42,7 +42,7 @@ class DiceLoss(nn.Module):
 
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr):
-  model = unet.UNet(n_channels=1, n_classes=2).to(DEVICE)
+  model = unet.UNet(n_channels=1, n_classes=1).to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
