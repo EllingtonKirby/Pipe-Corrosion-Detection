@@ -38,7 +38,6 @@ class Baseline(nn.Module):
       nn.Conv2d(in_channels=num_channels*2, out_channels=num_channels*2, kernel_size=3, padding=1),
       nn.ReLU(),
       nn.Conv2d(in_channels=num_channels*2, out_channels=1, kernel_size=3, padding=1),
-      nn.ReLU(),
     )
     self.classifier = nn.Sequential(
       nn.Sigmoid()
@@ -72,8 +71,8 @@ class DiceLoss(nn.Module):
 def train(train_dataloaer, validation_dataloader, num_epochs, lr):
   model = Baseline().to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
-  metric = BinaryJaccardIndex().to(DEVICE)
-  criterion = DiceLoss().to(DEVICE)
+  metric = BinaryJaccardIndex()
+  criterion = DiceLoss()
   for e in range(num_epochs):
     model.train()
     train_loss = 0
