@@ -85,15 +85,16 @@ def build_dataloaders(dataframe):
   # X_train = torch.tensor(scaler.transform(X_train)).float()
   # X_valid = torch.tensor(scaler.transform(X_valid)).float()
   
-  flipper = v2.RandomVerticalFlip(1)
-  X_train_flipped, Y_train_flipped = flipper(X_train), flipper(Y_train)
-
   rolled_x, rolled_y = [], []
-  for i in range(36):
+  for i in range(36, 2):
       rolled_x.append(torch.roll(X_train, i, dims=3))
       rolled_y.append(torch.roll(Y_train, i, dims=3))
 
-  X_train, Y_train = torch.vstack((X_train, X_train_flipped, *rolled_x)), torch.vstack((Y_train, Y_train_flipped, *rolled_y))
+  X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
+
+  flipper = v2.RandomVerticalFlip(1)
+  X_train, Y_train = torch.vstack((X_train, flipper(X_train))), torch.vstack((Y_train, flipper(Y_train)))
+  
   train_dataset = WellsDataset(X_train, Y_train, None)
   valid_dataset = WellsDataset(X_valid, Y_valid, None)
 

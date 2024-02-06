@@ -63,7 +63,7 @@ class DiceLoss(nn.Module):
     return 1 - dice
 
 
-def train(train_dataloaer, validation_dataloader, num_epochs, lr):
+def train(train_dataloader, validation_dataloader, num_epochs, lr):
   model = Baseline().to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
@@ -72,7 +72,7 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
     model.train()
     train_loss = 0
     train_iou = 0
-    for input, labels in tqdm(iter(train_dataloaer)):
+    for input, labels in tqdm(iter(train_dataloader)):
       input = input.to(DEVICE)
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
@@ -98,10 +98,10 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
         valid_iou += iou.detach().item()
     
     print(f'Epoch: {e}')
-    print(f'Train loss:      {train_loss}')
-    print(f'Validation loss: {valid_loss}')
-    print(f'Train intersection over union:      {train_iou}')
-    print(f'Validation intersection over union: {valid_iou}')
+    print(f'Train loss:      {train_loss / len(train_dataloader)}')
+    print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
+    print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
+    print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
   torch.save(model.state_dict(), 'baseline_model')
 
 if __name__ == '__main__':
