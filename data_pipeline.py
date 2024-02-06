@@ -1,10 +1,5 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, Dataset, random_split, TensorDataset
-from torchvision.transforms import functional as VF
-from torchmetrics.classification import BinaryJaccardIndex
-from torchvision import models, datasets, tv_tensors
+from torch.utils.data import DataLoader, Dataset
 from torchvision.transforms import v2
 import pandas as pd
 import numpy as np
