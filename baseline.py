@@ -29,15 +29,15 @@ class Baseline(nn.Module):
     super().__init__()
     num_channels = 64
     self.feature_extractor = nn.Sequential(
-      nn.Conv2d(in_channels=1, out_channels=num_channels, kernel_size=3, padding=1),
+      nn.Conv2d(in_channels=1, out_channels=num_channels, kernel_size=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels, out_channels=num_channels, kernel_size=3, padding=1),
+      nn.Conv2d(in_channels=num_channels, out_channels=num_channels, kernel_size=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels, out_channels=num_channels*2, kernel_size=3, padding=1),
+      nn.Conv2d(in_channels=num_channels, out_channels=num_channels*2, kernel_size=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels*2, out_channels=num_channels*2, kernel_size=3, padding=1),
+      nn.Conv2d(in_channels=num_channels*2, out_channels=num_channels*2, kernel_size=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels*2, out_channels=1, kernel_size=3, padding=1),
+      nn.Conv2d(in_channels=num_channels*2, out_channels=1, kernel_size=1),
     )
     self.classifier = nn.Sequential(
       nn.Sigmoid()
