@@ -6,22 +6,22 @@ from tqdm import tqdm
 from data_pipeline import build_dataframe, build_dataloaders
 
 global DEVICE
-DEVICE = None
-if torch.cuda.is_available():
-    DEVICE = torch.device('cuda:0')
-    print("CUDA is available and is used")
-elif not torch.backends.mps.is_available():
-    if not torch.backends.mps.is_built():
-        print("MPS not available because the current PyTorch install was not "
-            "built with MPS enabled.")
-    else:
-        print("MPS not available because the current MacOS version is not 12.3+ "
-            "and/or you do not have an MPS-enabled device on this machine.")
-    DEVICE = torch.device('cpu')
-    print("CUDA and MPS are not available, switching to CPU.")
-else:
-    DEVICE = torch.device("mps")
-    print("CUDA not available, switching to MPS")
+DEVICE = torch.device('cpu')
+# if torch.cuda.is_available():
+#     DEVICE = torch.device('cuda:0')
+#     print("CUDA is available and is used")
+# elif not torch.backends.mps.is_available():
+#     if not torch.backends.mps.is_built():
+#         print("MPS not available because the current PyTorch install was not "
+#             "built with MPS enabled.")
+#     else:
+#         print("MPS not available because the current MacOS version is not 12.3+ "
+#             "and/or you do not have an MPS-enabled device on this machine.")
+#     DEVICE = torch.device('cpu')
+#     print("CUDA and MPS are not available, switching to CPU.")
+# else:
+#     DEVICE = torch.device("mps")
+#     print("CUDA not available, switching to MPS")
 
 
 class Baseline(nn.Module):
