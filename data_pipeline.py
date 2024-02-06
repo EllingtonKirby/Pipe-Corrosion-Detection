@@ -21,28 +21,29 @@ class WellsDataset(Dataset):
     def __getitem__(self, idx):
         image = self.data[idx]
         label = self.labels[idx]
-        # image = torch.tensor(self.scaler.fit_transform(image.reshape(-1, 1)))
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
             label = self.target_transform(label)
-        return image.reshape(1, 36, 36).float(), label.reshape(1,36, 36)
+        return image, label
     
-
 def build_dataframe():
+  if os.path.exists('./inputs/x_train_df.csv'):
+      return pd.read_csv('inputs/x_train_df.csv')
+
   data_dir = './train/images/'
   data_dict = []
   pattern = r'well_(\d+)_patch_(\d+)\.npy'
   for i, filename in enumerate(os.listdir(data_dir)):
-    example = np.load(data_dir + filename)
-    match = re.match(pattern, filename)
-    if match:
-      well_number = int(match.group(1))  # Extract well number
-      patch_number = int(match.group(2)) # Extract patch number
-    else:
-      print("Filename format does not match the expected pattern.")  
-    
-    data_dict.append((filename, well_number, patch_number, example.flatten()))
+      example = np.load(data_dir + filename)
+      match = re.match(pattern, filename)
+      if match:
+          well_number = int(match.group(1))  # Extract well number
+          patch_number = int(match.group(2)) # Extract patch number
+      else:
+          print("Filename format does not match the expected pattern.")  
+
+      data_dict.append((filename, well_number, patch_number, example.flatten()))
 
   df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
 
@@ -64,13 +65,12 @@ def build_dataframe():
   outliers = ((data.min(dim=1, keepdim=True).values == -999.2500) == True).flatten()
 
   merged = merged.drop(merged.loc[outliers.tolist()].index)
-
+  merged.to_csv(path_or_buf='./inputs/x_train.csv')
   return merged
 
-
 def build_dataloaders(dataframe):
-  data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
-  labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
+  data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy())).reshape(-1, 1, 36, 36)
+  labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy())).reshape(-1, 1, 36, 36)
 
   p = np.random.permutation(len(data))
   data, labels = data[p], labels[p]
@@ -79,15 +79,21 @@ def build_dataloaders(dataframe):
   X_train, X_valid = data[:offset], data[offset:]
   Y_train, Y_valid = labels[:offset].float(), labels[offset:].float()
 
-  scaler = RobustScaler()
-  scaler.fit(X_train)
-  X_train = torch.tensor(scaler.transform(X_train)).float()
-  X_valid = torch.tensor(scaler.transform(X_valid)).float()
+  # scaler = RobustScaler()
+  # scaler.fit(X_train)
+  # X_train = torch.tensor(scaler.transform(X_train)).float()
+  # X_valid = torch.tensor(scaler.transform(X_valid)).float()
   
   flipper = v2.RandomVerticalFlip(1)
   X_train_flipped, Y_train_flipped = flipper(X_train), flipper(Y_train)
 
-  train_dataset = WellsDataset(torch.vstack((X_train, X_train_flipped)), torch.vstack((Y_train, Y_train_flipped)), None)
+  rolled_x, rolled_y = [], []
+  for i in range(36):
+      rolled_x.append(torch.roll(X_train, i, dims=3))
+      rolled_y.append(torch.roll(Y_train, i, dims=3))
+
+  X_train, Y_train = torch.vstack((X_train, X_train_flipped, *rolled_x)), torch.vstack((Y_train, Y_train_flipped, *rolled_y))
+  train_dataset = WellsDataset(X_train, Y_train, None)
   valid_dataset = WellsDataset(X_valid, Y_valid, None)
 
   train_dataloader = DataLoader(train_dataset, batch_size=128)
