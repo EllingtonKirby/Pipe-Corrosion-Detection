@@ -86,9 +86,9 @@ def build_dataloaders(dataframe):
   # X_valid = torch.tensor(scaler.transform(X_valid)).float()
   
   rolled_x, rolled_y = [], []
-  for i in range(36, 2):
-      rolled_x.append(torch.roll(X_train, i, dims=3))
-      rolled_y.append(torch.roll(Y_train, i, dims=3))
+  for i in range(1, 36, 2):
+    rolled_x.append(torch.roll(X_train, i, dims=3))
+    rolled_y.append(torch.roll(Y_train, i, dims=3))
 
   X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
 
