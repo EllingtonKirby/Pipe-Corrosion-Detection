@@ -88,7 +88,7 @@ def build_dataloaders(dataframe):
   # X_train_flipped, Y_train_flipped = flipper(X_train), flipper(Y_train)
 
   # train_dataset = WellsDataset(torch.vstack((X_train, X_train_flipped)), torch.vstack((Y_train, Y_train_flipped)), None)
-  train_dataset = WellsDataset(torch.vstack((X_train)), torch.vstack((Y_train)), None)
+  train_dataset = WellsDataset(X_train, Y_train, None)
   valid_dataset = WellsDataset(X_valid, Y_valid, None)
 
   train_dataloader = DataLoader(train_dataset, batch_size=128)
