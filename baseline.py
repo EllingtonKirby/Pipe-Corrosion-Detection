@@ -5,6 +5,24 @@ from torchmetrics.classification import BinaryJaccardIndex
 from tqdm import tqdm
 from data_pipeline import build_dataframe, build_dataloaders
 
+global DEVICE
+DEVICE = None
+if torch.cuda.is_available():
+    DEVICE = torch.device('cuda:0')
+    print("CUDA is available and is used")
+elif not torch.backends.mps.is_available():
+    if not torch.backends.mps.is_built():
+        print("MPS not available because the current PyTorch install was not "
+            "built with MPS enabled.")
+    else:
+        print("MPS not available because the current MacOS version is not 12.3+ "
+            "and/or you do not have an MPS-enabled device on this machine.")
+    DEVICE = torch.device('cpu')
+    print("CUDA and MPS are not available, switching to CPU.")
+else:
+    DEVICE = torch.device("mps")
+    print("CUDA not available, switching to MPS")
+
 
 class Baseline(nn.Module):
   def __init__(self) -> None:
@@ -47,6 +65,7 @@ class DiceLoss(nn.Module):
 
 def train(train_dataloaer, validation_dataloader, num_epochs, lr):
   model = Baseline()
+  model.to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex()
   criterion = DiceLoss()
@@ -55,10 +74,12 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
     train_loss = 0
     train_iou = 0
     for input, labels in tqdm(iter(train_dataloaer)):
+      input = input.to(DEVICE)
+      labels = labels.to(DEVICE)
       optimizer.zero_grad()
       output = model(input)
       loss = criterion(output, labels)
-      train_loss += loss
+      train_loss += loss.item()
       iou = metric(output, labels)
       train_iou += iou
       loss.backward()
@@ -69,6 +90,8 @@ def train(train_dataloaer, validation_dataloader, num_epochs, lr):
     valid_iou = 0
     with torch.no_grad():
       for input, labels in tqdm(iter(validation_dataloader)):
+        input = input.to(DEVICE)
+        labels = labels.to(DEVICE)
         out = model(input)
         loss = criterion(out, labels)
         iou = metric(out, labels)
