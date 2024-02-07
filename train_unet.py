@@ -47,7 +47,6 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
   for e in range(num_epochs):
-    model.train()
     train_loss = 0
     train_iou = 0
     for input, labels in tqdm(iter(train_dataloader)):
@@ -62,7 +61,6 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       loss.backward()
       optimizer.step()
 
-    model.eval()
     valid_loss = 0
     valid_iou = 0
     with torch.no_grad():

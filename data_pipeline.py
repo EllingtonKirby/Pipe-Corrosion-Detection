@@ -80,20 +80,20 @@ def build_dataloaders(dataframe):
   X_train, X_valid = data[:offset], data[offset:]
   Y_train, Y_valid = labels[:offset].float(), labels[offset:].float()
 
-  # scaler = RobustScaler()
-  # scaler.fit(X_train)
-  # X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
-  # X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
+  scaler = RobustScaler()
+  scaler.fit(X_train)
+  X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
+  X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
   
-  # rolled_x, rolled_y = [], []
-  # for i in range(1, 36, 2):
-  #   rolled_x.append(torch.roll(X_train, i, dims=3))
-  #   rolled_y.append(torch.roll(Y_train, i, dims=3))
+  rolled_x, rolled_y = [], []
+  for i in range(1, 36, 2):
+    rolled_x.append(torch.roll(X_train, i, dims=3))
+    rolled_y.append(torch.roll(Y_train, i, dims=3))
 
-  # X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
+  X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
 
-  # flipper = v2.RandomVerticalFlip(1)
-  # X_train, Y_train = torch.vstack((X_train, flipper(X_train))), torch.vstack((Y_train, flipper(Y_train)))
+  flipper = v2.RandomVerticalFlip(1)
+  X_train, Y_train = torch.vstack((X_train, flipper(X_train))), torch.vstack((Y_train, flipper(Y_train)))
   
   train_dataset = WellsDataset(X_train, Y_train, None)
   valid_dataset = WellsDataset(X_valid, Y_valid, None)
