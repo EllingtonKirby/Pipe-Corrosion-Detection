@@ -69,9 +69,9 @@ def build_dataframe():
   return merged
 
 def build_dataloaders(dataframe):
-  data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy())).reshape(-1, 1, 36, 36)
+  data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   data = torch.nan_to_num(data)
-  labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy())).reshape(-1, 1, 36, 36)
+  labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
 
   p = np.random.permutation(len(data))
   data, labels = data[p], labels[p]
@@ -82,8 +82,8 @@ def build_dataloaders(dataframe):
 
   scaler = RobustScaler()
   scaler.fit(X_train)
-  X_train = torch.tensor(scaler.transform(X_train)).float()
-  X_valid = torch.tensor(scaler.transform(X_valid)).float()
+  X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
+  X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
   
   rolled_x, rolled_y = [], []
   for i in range(1, 36, 2):
