@@ -46,6 +46,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
+  predictor = nn.Softmax(dim=1)
   for e in range(num_epochs):
     model.train()
     train_loss = 0
@@ -55,9 +56,9 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
       output = model(input)
-      preds = torch.argmax(F.softmax(output, dim=1), dim=1).view(-1, 1, 36, 36)
+      preds = torch.argmax(predictor(output), dim=1)
       loss = criterion(preds, labels)
-      iou = metric(preds, labels)
+      iou = metric(preds.view(-1, 1, 36, 36), labels)
       train_loss += loss
       train_iou += iou
       loss.backward()
@@ -71,8 +72,8 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
         out = model(input)
-        preds = torch.argmax(F.softmax(out, dim=1), dim=1).view(-1, 1, 36, 36)
-        loss = criterion(preds, labels)
+        preds = torch.argmax(predictor(out), dim=1)
+        loss = criterion(preds.view(-1, 1, 36, 36), labels)
         iou = metric(preds, labels)
         valid_loss += loss
         valid_iou += iou
