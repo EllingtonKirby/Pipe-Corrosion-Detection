@@ -71,7 +71,7 @@ def build_dataframe():
 def build_dataloaders(dataframe):
   data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   data = torch.nan_to_num(data)
-  labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
+  labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy())).reshape(-1, 1, 36, 36)
 
   p = np.random.permutation(len(data))
   data, labels = data[p], labels[p]
