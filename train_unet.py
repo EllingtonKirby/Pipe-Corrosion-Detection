@@ -58,8 +58,8 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       preds = torch.argmax(F.softmax(output, dim=1), dim=1).view(-1, 1, 36, 36)
       loss = criterion(preds, labels)
       iou = metric(preds, labels)
-      train_loss += loss.detach().item()
-      train_iou += iou.detach().item()
+      train_loss += loss
+      train_iou += iou
       loss.backward()
       optimizer.step()
 
@@ -74,8 +74,8 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
         preds = torch.argmax(F.softmax(out, dim=1), dim=1).view(-1, 1, 36, 36)
         loss = criterion(preds, labels)
         iou = metric(preds, labels)
-        valid_loss += loss.detach().item()
-        valid_iou += iou.detach().item()
+        valid_loss += loss
+        valid_iou += iou
     
     print(f'Epoch: {e}')
     print(f'Train loss:      {train_loss / len(train_dataloader)}')
