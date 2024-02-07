@@ -67,7 +67,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       preds = predictor(output)
       print("Preds1: ", preds)
       preds = torch.argmax(preds, dim=1)
-      preds("Preds2: ", preds)
+      print("Preds2: ", preds)
       loss = criterion(preds, labels)
       iou = metric(preds.view(-1, 1, 36, 36), labels)
       train_loss += loss
