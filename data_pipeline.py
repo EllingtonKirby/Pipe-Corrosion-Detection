@@ -80,10 +80,10 @@ def build_dataloaders(dataframe):
   X_train, X_valid = data[:offset], data[offset:]
   Y_train, Y_valid = labels[:offset].float(), labels[offset:].float()
 
-  # scaler = RobustScaler()
-  # scaler.fit(X_train)
-  # X_train = torch.tensor(scaler.transform(X_train)).float()
-  # X_valid = torch.tensor(scaler.transform(X_valid)).float()
+  scaler = RobustScaler()
+  scaler.fit(X_train)
+  X_train = torch.tensor(scaler.transform(X_train)).float()
+  X_valid = torch.tensor(scaler.transform(X_valid)).float()
   
   rolled_x, rolled_y = [], []
   for i in range(1, 36, 2):

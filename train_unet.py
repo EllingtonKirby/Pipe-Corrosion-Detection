@@ -31,20 +31,13 @@ class DiceLoss(nn.Module):
 
   def forward(self, inputs, targets, smooth=1):
     #comment out if your model contains a sigmoid or equivalent activation layer
-    # inputs = F.sigmoid(inputs)       
+    inputs = F.sigmoid(inputs)       
     
     #flatten label and prediction tensors
-    print("Dice Loss")
-    print("Inputs: ", inputs)
-    print("Target: ", inputs)
     inputs = inputs.view(-1)
     targets = targets.view(-1)
-    print("Inputs: ", inputs)
-    print("Target: ", inputs)
     intersection = (inputs * targets).sum()                            
-    print("Intersection: ", intersection)
     dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
-    print("Dice: ", dice)
     return 1 - dice
 
 
@@ -53,7 +46,6 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
-  predictor = nn.Softmax(dim=1)
   for e in range(num_epochs):
     model.train()
     train_loss = 0
@@ -62,14 +54,9 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       input = input.to(DEVICE)
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
-      output = model(input)
-      print("Output: ", output)
-      preds = predictor(output)
-      print("Preds1: ", preds)
-      preds = torch.argmax(preds, dim=1)
-      print("Preds2: ", preds)
+      preds = model(input)
       loss = criterion(preds, labels)
-      iou = metric(preds.view(-1, 1, 36, 36), labels)
+      iou = metric(preds, labels)
       train_loss += loss
       train_iou += iou
       loss.backward()
@@ -82,9 +69,8 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       for input, labels in tqdm(iter(validation_dataloader)):
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
-        out = model(input)
-        preds = torch.argmax(predictor(out), dim=1)
-        loss = criterion(preds.view(-1, 1, 36, 36), labels)
+        preds = model(input)
+        loss = criterion(preds, labels)
         iou = metric(preds, labels)
         valid_loss += loss
         valid_iou += iou
