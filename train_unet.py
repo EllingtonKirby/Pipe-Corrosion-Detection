@@ -46,6 +46,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
+  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)
   for e in range(num_epochs):
     train_loss = 0
     train_iou = 0
@@ -78,6 +79,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
     print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
     print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
     print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
+    scheduler.step(valid_iou / len(validation_dataloader), e)
   torch.save(model.state_dict(), 'unet_1.pt')
 
 if __name__ == '__main__':
