@@ -31,7 +31,7 @@ class DiceLoss(nn.Module):
 
   def forward(self, inputs, targets, smooth=1):
     #comment out if your model contains a sigmoid or equivalent activation layer
-    inputs = F.sigmoid(inputs)       
+    # inputs = F.sigmoid(inputs)       
     
     #flatten label and prediction tensors
     inputs = inputs.view(-1)
@@ -42,7 +42,7 @@ class DiceLoss(nn.Module):
 
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr):
-  model = unet.UNet(n_channels=1, n_classes=1).to(DEVICE)
+  model = unet.UNet(n_channels=1, n_classes=2).to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
@@ -55,9 +55,10 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
       output = model(input)
-      loss = criterion(output, labels)
+      preds = torch.argmax(F.softmax(output, dim=1), dim=1)
+      loss = criterion(preds, labels)
+      iou = metric(preds, labels)
       train_loss += loss.detach().item()
-      iou = metric(output, labels)
       train_iou += iou.detach().item()
       loss.backward()
       optimizer.step()
@@ -70,8 +71,9 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
         out = model(input)
-        loss = criterion(out, labels)
-        iou = metric(out, labels)
+        preds = torch.argmax(F.softmax(out, dim=1), dim=1)
+        loss = criterion(preds, labels)
+        iou = metric(preds, labels)
         valid_loss += loss.detach().item()
         valid_iou += iou.detach().item()
     
