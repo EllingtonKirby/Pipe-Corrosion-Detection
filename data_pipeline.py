@@ -73,7 +73,7 @@ def build_dataloaders(dataframe):
     p = np.random.permutation(len(data))
     with open('train_set_permutation.json', 'w') as f:
         # Write permutation to file so that we can re-apply the same transform later
-        json.dump(p, f)
+        json.dump(p.tolist(), f)
 
     data, labels = data[p], labels[p]
 
