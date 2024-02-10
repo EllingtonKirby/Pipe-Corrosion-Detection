@@ -6,6 +6,7 @@ import numpy as np
 import os
 import re
 from sklearn.preprocessing import RobustScaler
+import json
 
 class WellsDataset(Dataset):
     def __init__(self, data, labels, transform):
@@ -70,6 +71,10 @@ def build_dataloaders(dataframe):
     labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
 
     p = np.random.permutation(len(data))
+    with open('train_set_permutation.json', 'w') as f:
+        # Write permutation to file so that we can re-apply the same transform later
+        json.dump(p, f)
+
     data, labels = data[p], labels[p]
 
     offset = int(len(data) * .8)
@@ -81,9 +86,10 @@ def build_dataloaders(dataframe):
     X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
     X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
 
-    num_non_zero_y = torch.count_nonzero(labels[:offset], axis=1)
-    examples_to_augment = X_train[num_non_zero_y > 25]
-    labels_to_augment = Y_train[num_non_zero_y > 25]
+    # Applying augmentations selectively does not improve performance
+    # num_non_zero_y = torch.count_nonzero(labels[:offset], axis=1)
+    examples_to_augment = X_train
+    labels_to_augment = Y_train
 
     rolled_x, rolled_y = [], []
     for i in range(1, 36):

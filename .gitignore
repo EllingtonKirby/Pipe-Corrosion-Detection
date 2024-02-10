@@ -163,3 +163,4 @@ test/
 train/
 example_submission.csv
 inputs/x_train.csv
+predictions

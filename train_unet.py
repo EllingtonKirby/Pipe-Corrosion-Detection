@@ -46,7 +46,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
-  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=3)
+  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)
   for e in range(num_epochs):
     train_loss = 0
     train_iou = 0
@@ -84,4 +84,4 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
 
 if __name__ == '__main__':
   train_dl, valid_dl = build_dataloaders(build_dataframe())
-  train(train_dl, valid_dl, 30, 0.001)
+  train(train_dl, valid_dl, 100, 0.001)
