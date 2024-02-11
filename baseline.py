@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torchvision.transforms import functional as VF
 from torchmetrics.classification import BinaryJaccardIndex
 from tqdm import tqdm
@@ -29,15 +30,15 @@ class Baseline(nn.Module):
     super().__init__()
     num_channels = 64
     self.feature_extractor = nn.Sequential(
-      nn.Conv2d(in_channels=1, out_channels=num_channels, kernel_size=1),
+      nn.Conv2d(in_channels=1, out_channels=num_channels, kernel_size=3, padding=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels, out_channels=num_channels, kernel_size=1),
+      nn.Conv2d(in_channels=num_channels, out_channels=num_channels, kernel_size=3, padding=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels, out_channels=num_channels*2, kernel_size=1),
+      nn.Conv2d(in_channels=num_channels, out_channels=num_channels*2, kernel_size=3, padding=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels*2, out_channels=num_channels*2, kernel_size=1),
+      nn.Conv2d(in_channels=num_channels*2, out_channels=num_channels*2, kernel_size=3, padding=1),
       nn.ReLU(),
-      nn.Conv2d(in_channels=num_channels*2, out_channels=1, kernel_size=1),
+      nn.Conv2d(in_channels=num_channels*2, out_channels=1, kernel_size=3, padding=1),
     )
     self.classifier = nn.Sequential(
       nn.Sigmoid()
@@ -62,12 +63,33 @@ class DiceLoss(nn.Module):
     dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
     return 1 - dice
 
+class DiceBCELoss(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super(DiceBCELoss, self).__init__()
+
+    def forward(self, inputs, targets, smooth=1):
+        
+        #comment out if your model contains a sigmoid or equivalent activation layer
+        # inputs = F.sigmoid(inputs)       
+        
+        #flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = (inputs * targets).sum()                            
+        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
+        BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
+        Dice_BCE = BCE + dice_loss
+        
+        return Dice_BCE
+
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr):
   model = Baseline().to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
-  criterion = DiceLoss().to(DEVICE)
+  criterion = DiceBCELoss().to(DEVICE)
+  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=3)
   for e in range(num_epochs):
     model.train()
     train_loss = 0
@@ -102,6 +124,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
     print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
     print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
     print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
+    scheduler.step(valid_iou / len(validation_dataloader), e)
   torch.save(model.state_dict(), 'baseline_model')
 
 if __name__ == '__main__':
