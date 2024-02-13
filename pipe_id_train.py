@@ -37,7 +37,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       optimizer.zero_grad()
       preds = model(input)
       loss = criterion(preds, labels)
-      acc = torch.mean((torch.argmax(F.softmax(preds), dim=1) == labels)*1.)
+      acc = torch.mean((torch.argmax(F.softmax(preds, dim=1), dim=1) == labels)*1.)
       train_loss += loss
       train_acc += acc
       loss.backward()
@@ -51,7 +51,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
         labels = labels.to(DEVICE)
         preds = model(input)
         loss = criterion(preds, labels)
-        acc = torch.mean((torch.argmax(F.softmax(preds), dim=1) == labels)*1.)
+        acc = torch.mean((torch.argmax(F.softmax(preds, dim=1), dim=1) == labels)*1.)
         valid_loss += loss
         valid_acc += acc
     
