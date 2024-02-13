@@ -135,7 +135,7 @@ def build_dataloaders_for_classiication(train_dataframe, valid_dataframe):
     labels = torch.from_numpy(np.vstack(train_dataframe['well_number'].to_numpy())).squeeze() - 1
 
     valid_data = torch.from_numpy(np.vstack(valid_dataframe['data'].to_numpy()))
-    valid_data = torch.nan_to_num(data)
+    valid_data = torch.nan_to_num(valid_data)
     valid_labels = torch.from_numpy(np.vstack(valid_dataframe['well_number'].to_numpy())).squeeze() - 1
 
     X_train, X_valid = data, valid_data
