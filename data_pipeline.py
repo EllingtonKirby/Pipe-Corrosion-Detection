@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import DataLoader, Dataset
+import torch.nn.functional as F
 from torchvision.transforms import v2
 import pandas as pd
 import numpy as np
@@ -100,6 +101,49 @@ def build_dataloaders(dataframe):
 
     flipper = v2.RandomVerticalFlip(1)
     X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.vstack((Y_train, flipper(labels_to_augment)))
+
+    train_dataset = WellsDataset(X_train, Y_train, None)
+    valid_dataset = WellsDataset(X_valid, Y_valid, None)
+
+    train_dataloader = DataLoader(train_dataset, batch_size=128)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=128)
+
+    return train_dataloader, valid_dataloader
+
+
+def build_dataloaders_for_classiication(dataframe):
+    data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
+    data = torch.nan_to_num(data)
+    labels = torch.from_numpy(np.vstack(dataframe['well_number'].to_numpy())) - 1
+
+    p = np.random.permutation(len(data))
+    with open('classification_train_set_permutation.json', 'w') as f:
+        # Write permutation to file so that we can re-apply the same transform later
+        json.dump(p.tolist(), f)
+
+    data, labels = data[p], labels[p]
+
+    offset = int(len(data) * .8)
+    X_train, X_valid = data[:offset], data[offset:]
+    Y_train, Y_valid = labels[:offset].float(), labels[offset:].float()
+
+    scaler = RobustScaler()
+    scaler.fit(X_train)
+    X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
+    X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
+
+    examples_to_augment = X_train
+    labels_to_augment = Y_train
+
+    rolled_x, rolled_y = [], []
+    for i in range(1, 36):
+        rolled_x.append(torch.roll(examples_to_augment, i, dims=3))
+        rolled_y.append(labels_to_augment)
+
+    X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
+
+    flipper = v2.RandomVerticalFlip(1)
+    X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.vstack((Y_train, labels_to_augment))
 
     train_dataset = WellsDataset(X_train, Y_train, None)
     valid_dataset = WellsDataset(X_valid, Y_valid, None)
