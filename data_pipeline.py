@@ -129,17 +129,20 @@ def build_test_dataframe():
   df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
   return df.sort_values(by=['well_number','patch_number'])
 
-def build_dataloaders_for_classiication(train_dataframe, valid_dataframe):
+def build_dataloaders_for_classiication(train_dataframe):
     data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(train_dataframe['well_number'].to_numpy())).squeeze() - 1
 
-    valid_data = torch.from_numpy(np.vstack(valid_dataframe['data'].to_numpy()))
-    valid_data = torch.nan_to_num(valid_data)
-    valid_labels = torch.from_numpy(np.vstack(valid_dataframe['well_number'].to_numpy())).squeeze() - 1
+    p = np.random.permutation(len(data))
+    with open('train_set_permutation.json', 'w') as f:
+        # Write permutation to file so that we can re-apply the same transform later
+        json.dump(p.tolist(), f)
 
-    X_train, X_valid = data, valid_data
-    Y_train, Y_valid = labels, valid_labels
+    data, labels = data[p], labels[p]
+    offset = int(len(data) * .5)
+    X_train, X_valid = data[:offset], data[offset:]
+    Y_train, Y_valid = labels[:offset], labels[offset:]
 
     scaler = RobustScaler()
     scaler.fit(X_train)
