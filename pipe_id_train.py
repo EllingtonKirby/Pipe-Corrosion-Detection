@@ -65,5 +65,5 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   torch.save(model.state_dict(), 'well_classifier_1.pt')
 
 if __name__ == '__main__':
-  train_dl, valid_dl = build_dataloaders_for_classiication(build_dataframe(), build_test_dataframe())
-  train(train_dl, valid_dl, 50, 0.001)
+  train_dl, valid_dl = build_dataloaders_for_classiication(build_dataframe())
+  train(train_dl, valid_dl, 30, 0.001)
