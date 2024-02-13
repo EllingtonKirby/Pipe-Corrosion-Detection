@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pipe_identifier
 from tqdm import tqdm
-from data_pipeline import build_dataframe, build_dataloaders_for_classiication
+from data_pipeline import build_dataframe, build_test_dataframe, build_dataloaders_for_classiication
 
 global DEVICE
 DEVICE = torch.device('cpu')
@@ -28,6 +28,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   model = pipe_identifier.PipeIdentifier(num_classes=15).to(DEVICE)
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   criterion = nn.CrossEntropyLoss().to(DEVICE)
+  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)
   for e in range(num_epochs):
     train_loss = 0
     train_acc = 0
@@ -60,8 +61,9 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
     print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
     print(f'Train accuracy:      {train_acc/ len(train_dataloader)}')
     print(f'Validation accuracy: {valid_acc/ len(validation_dataloader)}')
+    scheduler.step(valid_acc / len(validation_dataloader), e)
   torch.save(model.state_dict(), 'well_classifier_1.pt')
 
 if __name__ == '__main__':
-  train_dl, valid_dl = build_dataloaders_for_classiication(build_dataframe())
+  train_dl, valid_dl = build_dataloaders_for_classiication(build_dataframe(), build_test_dataframe())
   train(train_dl, valid_dl, 50, 0.001)

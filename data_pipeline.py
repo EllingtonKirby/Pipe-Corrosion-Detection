@@ -110,22 +110,36 @@ def build_dataloaders(dataframe):
 
     return train_dataloader, valid_dataloader
 
+def build_test_dataframe():
+  data_dir = './test/images/'
+  data_dict = []
+  pattern = r'well_(\d+)_patch_(\d+)\.npy'
+  for i, filename in enumerate(os.listdir(data_dir)):
+      example = np.load(data_dir + filename)
+      match = re.match(pattern, filename)
+      name = filename[:-4]
+      if match:
+          well_number = int(match.group(1))  # Extract well number
+          patch_number = int(match.group(2)) # Extract patch number
+      else:
+          print("Filename format does not match the expected pattern.")  
 
-def build_dataloaders_for_classiication(dataframe):
-    data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
+      data_dict.append((name, well_number, patch_number, example.flatten()))
+
+  df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
+  return df.sort_values(by=['well_number','patch_number'])
+
+def build_dataloaders_for_classiication(train_dataframe, valid_dataframe):
+    data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
-    labels = torch.from_numpy(np.vstack(dataframe['well_number'].to_numpy())).squeeze() - 1
+    labels = torch.from_numpy(np.vstack(train_dataframe['well_number'].to_numpy())).squeeze() - 1
 
-    p = np.random.permutation(len(data))
-    with open('classification_train_set_permutation.json', 'w') as f:
-        # Write permutation to file so that we can re-apply the same transform later
-        json.dump(p.tolist(), f)
+    valid_data = torch.from_numpy(np.vstack(valid_dataframe['data'].to_numpy()))
+    valid_data = torch.nan_to_num(data)
+    valid_labels = torch.from_numpy(np.vstack(valid_dataframe['well_number'].to_numpy())).squeeze() - 1
 
-    data, labels = data[p], labels[p]
-
-    offset = int(len(data) * .8)
-    X_train, X_valid = data[:offset], data[offset:]
-    Y_train, Y_valid = labels[:offset], labels[offset:]
+    X_train, X_valid = data, valid_data
+    Y_train, Y_valid = labels, valid_labels
 
     scaler = RobustScaler()
     scaler.fit(X_train)
