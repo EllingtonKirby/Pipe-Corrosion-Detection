@@ -125,7 +125,7 @@ def build_dataloaders_for_classiication(dataframe):
 
     offset = int(len(data) * .8)
     X_train, X_valid = data[:offset], data[offset:]
-    Y_train, Y_valid = labels[:offset].float(), labels[offset:].float()
+    Y_train, Y_valid = labels[:offset], labels[offset:]
 
     scaler = RobustScaler()
     scaler.fit(X_train)
