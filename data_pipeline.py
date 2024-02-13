@@ -114,7 +114,7 @@ def build_dataloaders(dataframe):
 def build_dataloaders_for_classiication(dataframe):
     data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
-    labels = torch.from_numpy(np.vstack(dataframe['well_number'].to_numpy())) - 1
+    labels = torch.from_numpy(np.vstack(dataframe['well_number'].to_numpy())).squeeze() - 1
 
     p = np.random.permutation(len(data))
     with open('classification_train_set_permutation.json', 'w') as f:
@@ -140,10 +140,10 @@ def build_dataloaders_for_classiication(dataframe):
         rolled_x.append(torch.roll(examples_to_augment, i, dims=3))
         rolled_y.append(labels_to_augment)
 
-    X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
+    X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.hstack((Y_train, *rolled_y))
 
     flipper = v2.RandomVerticalFlip(1)
-    X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.vstack((Y_train, labels_to_augment))
+    X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.hstack((Y_train, labels_to_augment))
 
     train_dataset = WellsDataset(X_train, Y_train, None)
     valid_dataset = WellsDataset(X_valid, Y_valid, None)
