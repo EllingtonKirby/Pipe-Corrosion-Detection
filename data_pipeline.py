@@ -66,26 +66,26 @@ def build_dataframe():
     merged = merged.drop(merged.loc[outliers.tolist()].index)
     return merged
 
-def build_dataloaders(dataframe):
+def build_dataloaders(dataframe, apply_scaling=False):
     data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
 
     p = np.random.permutation(len(data))
-    with open('train_set_permutation.json', 'w') as f:
-        # Write permutation to file so that we can re-apply the same transform later
-        json.dump(p.tolist(), f)
-
     data, labels = data[p], labels[p]
 
     offset = int(len(data) * .8)
     X_train, X_valid = data[:offset], data[offset:]
     Y_train, Y_valid = labels[:offset].float().reshape(-1, 1, 36, 36), labels[offset:].float().reshape(-1, 1, 36, 36)
 
-    scaler = RobustScaler()
-    scaler.fit(X_train)
-    X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
-    X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
+    if (apply_scaling):
+        with open('train_set_permutation.json', 'w') as f:
+            # Write permutation to file so that we can re-apply the same transform later
+            json.dump(p.tolist(), f)
+        scaler = RobustScaler()
+        scaler.fit(X_train)
+        X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
+        X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
 
     # Applying augmentations selectively does not improve performance
     # num_non_zero_y = torch.count_nonzero(labels[:offset], axis=1)
@@ -129,25 +129,26 @@ def build_test_dataframe():
   df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
   return df.sort_values(by=['well_number','patch_number'])
 
-def build_dataloaders_for_classiication(train_dataframe):
+def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False):
     data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(train_dataframe['well_number'].to_numpy())).squeeze() - 1
 
     p = np.random.permutation(len(data))
-    with open('train_set_permutation.json', 'w') as f:
-        # Write permutation to file so that we can re-apply the same transform later
-        json.dump(p.tolist(), f)
 
     data, labels = data[p], labels[p]
     offset = int(len(data) * .5)
     X_train, X_valid = data[:offset], data[offset:]
     Y_train, Y_valid = labels[:offset], labels[offset:]
 
-    scaler = RobustScaler()
-    scaler.fit(X_train)
-    X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
-    X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
+    if (apply_scaling):
+        with open('classification_set_permutation.json', 'w') as f:
+            # Write permutation to file so that we can re-apply the same transform later
+            json.dump(p.tolist(), f)
+        scaler = RobustScaler()
+        scaler.fit(X_train)
+        X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
+        X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
 
     examples_to_augment = X_train
     labels_to_augment = Y_train
