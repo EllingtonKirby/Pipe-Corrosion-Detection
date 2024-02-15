@@ -169,3 +169,28 @@ def build_dataloaders_for_classiication(train_dataframe):
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)
 
     return train_dataloader, valid_dataloader
+
+
+def individually_scale_all_images():
+    data_dir = './train/images/'
+    output_dir = './train/processed_images/'
+    print(f"Scaling {data_dir}")
+    for _, filename in enumerate(os.listdir(data_dir)):
+        print(f"Processing: {filename}")
+        example = np.load(data_dir + filename)
+        scaled = RobustScaler().fit_transform(example)
+        np.save(output_dir + filename, scaled)
+    
+    data_dir = './test/images/'
+    output_dir = './test/processed_images/'
+    print(f"Scaling {data_dir}")
+    for _, filename in enumerate(os.listdir(data_dir)):
+        print(f"Processing: {filename}")
+        example = np.load(data_dir + filename)
+        scaled = RobustScaler().fit_transform(example)
+        np.save(output_dir + filename, scaled)
+
+if __name__ == '__main__':
+    print("Data pipeline invoked directly, applying robust scaler to all images individually")
+    individually_scale_all_images()
+    print("Done")
