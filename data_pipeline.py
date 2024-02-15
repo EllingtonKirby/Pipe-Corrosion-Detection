@@ -29,8 +29,11 @@ class WellsDataset(Dataset):
             label = self.target_transform(label)
         return image, label
     
-def build_dataframe():
-    data_dir = './train/images/'
+def build_dataframe(use_processed_images=True):
+    if use_processed_images:
+        data_dir = './train/processed_images/'
+    else:
+        data_dir = './train/images/'
     data_dict = []
     pattern = r'well_(\d+)_patch_(\d+)\.npy'
     for i, filename in enumerate(os.listdir(data_dir)):
@@ -75,7 +78,7 @@ def build_dataloaders(dataframe, apply_scaling=False):
     data, labels = data[p], labels[p]
 
     offset = int(len(data) * .8)
-    X_train, X_valid = data[:offset], data[offset:]
+    X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
     Y_train, Y_valid = labels[:offset].float().reshape(-1, 1, 36, 36), labels[offset:].float().reshape(-1, 1, 36, 36)
 
     if (apply_scaling):
