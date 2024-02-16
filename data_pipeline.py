@@ -183,7 +183,7 @@ def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False, ap
 
     data, labels = data[p], labels[p]
     offset = int(len(data) * .8)
-    X_train, X_valid = data[:offset], data[offset:]
+    X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
     Y_train, Y_valid = labels[:offset], labels[offset:]
 
     if (apply_scaling):
