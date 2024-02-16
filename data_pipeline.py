@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import DataLoader, Dataset
 import torch.nn.functional as F
+import torchvision
 from torchvision.transforms import v2
 import pandas as pd
 import numpy as np
@@ -8,26 +9,7 @@ import os
 import re
 from sklearn.preprocessing import RobustScaler
 import json
-
-class WellsDataset(Dataset):
-    def __init__(self, data, labels, transform):
-        self.data = data
-        self.labels = labels
-        self.transform = transform
-        self.target_transform = False
-        self.scaler = RobustScaler()
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, idx):
-        image = self.data[idx]
-        label = self.labels[idx]
-        if self.transform:
-            image = self.transform(image)
-        if self.target_transform:
-            label = self.target_transform(label)
-        return image, label
+torchvision.disable_beta_transforms_warning()
     
 def build_dataframe(use_processed_images=True):
     if use_processed_images:
@@ -69,7 +51,56 @@ def build_dataframe(use_processed_images=True):
     merged = merged.drop(merged.loc[outliers.tolist()].index)
     return merged
 
-def build_dataloaders(dataframe, apply_scaling=False):
+def build_test_dataframe():
+  data_dir = './test/images/'
+  data_dict = []
+  pattern = r'well_(\d+)_patch_(\d+)\.npy'
+  for i, filename in enumerate(os.listdir(data_dir)):
+      example = np.load(data_dir + filename)
+      match = re.match(pattern, filename)
+      name = filename[:-4]
+      if match:
+          well_number = int(match.group(1))  # Extract well number
+          patch_number = int(match.group(2)) # Extract patch number
+      else:
+          print("Filename format does not match the expected pattern.")  
+
+      data_dict.append((name, well_number, patch_number, example.flatten()))
+
+  df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
+  return df.sort_values(by=['well_number','patch_number'])
+class WellsDataset(Dataset):
+    def __init__(self, data, labels, transform):
+        self.data = data
+        self.labels = labels
+        self.transform = transform
+        if (self.transform):
+            self.flipper = v2.RandomVerticalFlip(1)
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        image = self.data[idx]
+        label = self.labels[idx]
+        if self.transform:
+            image, label = self.transform(image, label, self.flipper)
+        return image, label
+    
+def image_label_transforms(image, label, flipper):
+    axis = 3
+    roll_distance = np.random.randint(0, 36)
+    image = torch.roll(image, roll_distance, dims=axis)
+    label = torch.roll(label, roll_distance, dims=axis)
+
+    flip = np.random.randint % 2 == 0
+    if (flip):
+        image = flipper(image)
+        label = flipper(label)
+
+    return image, label
+
+def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentations=False):
     data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
@@ -90,49 +121,32 @@ def build_dataloaders(dataframe, apply_scaling=False):
         X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
         X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
 
-    # Applying augmentations selectively does not improve performance
-    # num_non_zero_y = torch.count_nonzero(labels[:offset], axis=1)
-    examples_to_augment = X_train
-    labels_to_augment = Y_train
+    if apply_bulk_data_augmentations:
+        examples_to_augment = X_train
+        labels_to_augment = Y_train
 
-    rolled_x, rolled_y = [], []
-    for i in range(1, 36):
-        rolled_x.append(torch.roll(examples_to_augment, i, dims=3))
-        rolled_y.append(torch.roll(labels_to_augment, i, dims=3))
+        rolled_x, rolled_y = [], []
+        for i in range(1, 36):
+            rolled_x.append(torch.roll(examples_to_augment, i, dims=3))
+            rolled_y.append(torch.roll(labels_to_augment, i, dims=3))
 
-    X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
+        X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
 
-    flipper = v2.RandomVerticalFlip(1)
-    X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.vstack((Y_train, flipper(labels_to_augment)))
+        flipper = v2.RandomVerticalFlip(1)
+        X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.vstack((Y_train, flipper(labels_to_augment)))
 
-    train_dataset = WellsDataset(X_train, Y_train, None)
-    valid_dataset = WellsDataset(X_valid, Y_valid, None)
+        train_dataset = WellsDataset(X_train, Y_train, None)
+        valid_dataset = WellsDataset(X_valid, Y_valid, None)
+    else:
+        train_dataset = WellsDataset(X_train, Y_train, image_label_transforms)
+        valid_dataset = WellsDataset(X_valid, Y_valid, None)
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)
 
     return train_dataloader, valid_dataloader
 
-def build_test_dataframe():
-  data_dir = './test/images/'
-  data_dict = []
-  pattern = r'well_(\d+)_patch_(\d+)\.npy'
-  for i, filename in enumerate(os.listdir(data_dir)):
-      example = np.load(data_dir + filename)
-      match = re.match(pattern, filename)
-      name = filename[:-4]
-      if match:
-          well_number = int(match.group(1))  # Extract well number
-          patch_number = int(match.group(2)) # Extract patch number
-      else:
-          print("Filename format does not match the expected pattern.")  
-
-      data_dict.append((name, well_number, patch_number, example.flatten()))
-
-  df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
-  return df.sort_values(by=['well_number','patch_number'])
-
-def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False):
+def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False, apply_bulk_data_augmentations=False):
     data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(train_dataframe['well_number'].to_numpy())).squeeze() - 1
@@ -153,27 +167,29 @@ def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False):
         X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
         X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
 
-    examples_to_augment = X_train
-    labels_to_augment = Y_train
+    if apply_bulk_data_augmentations:
+        examples_to_augment = X_train
+        labels_to_augment = Y_train
 
-    rolled_x, rolled_y = [], []
-    for i in range(1, 36):
-        rolled_x.append(torch.roll(examples_to_augment, i, dims=3))
-        rolled_y.append(labels_to_augment)
+        rolled_x, rolled_y = [], []
+        for i in range(1, 36):
+            rolled_x.append(torch.roll(examples_to_augment, i, dims=3))
+            rolled_y.append(labels_to_augment)
 
-    X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.hstack((Y_train, *rolled_y))
+        X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.hstack((Y_train, *rolled_y))
+        flipper = v2.RandomVerticalFlip(1)
+        X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.hstack((Y_train, labels_to_augment))
 
-    flipper = v2.RandomVerticalFlip(1)
-    X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.hstack((Y_train, labels_to_augment))
-
-    train_dataset = WellsDataset(X_train, Y_train, None)
-    valid_dataset = WellsDataset(X_valid, Y_valid, None)
+        train_dataset = WellsDataset(X_train, Y_train, None)
+        valid_dataset = WellsDataset(X_valid, Y_valid, None)
+    else:
+        train_dataset = WellsDataset(X_train, Y_train, image_label_transforms)
+        valid_dataset = WellsDataset(X_valid, Y_valid, None)
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)
 
     return train_dataloader, valid_dataloader
-
 
 def individually_scale_all_images():
     data_dir = './train/images/'

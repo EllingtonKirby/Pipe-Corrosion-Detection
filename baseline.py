@@ -79,7 +79,7 @@ class DiceBCELoss(nn.Module):
         intersection = (inputs * targets).sum()                            
         dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
         BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
-        Dice_BCE = dice_loss
+        Dice_BCE = BCE + dice_loss
         
         return Dice_BCE
 
@@ -124,7 +124,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
     print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
     print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
     print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
-    scheduler.step(valid_iou / len(validation_dataloader), e)
+    scheduler.step(valid_iou / len(validation_dataloader))
   torch.save(model.state_dict(), 'baseline_model_2.pt')
 
 if __name__ == '__main__':
