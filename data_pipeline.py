@@ -123,6 +123,9 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
     if split_train:
         p = np.random.permutation(len(data))
         data, labels = data[p], labels[p]
+        with open('train_set_permutation.json', 'w') as f:
+            # Write permutation to file so that we can re-apply the same transform later
+            json.dump(p.tolist(), f)
 
         offset = int(len(data) * .8)
         X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
@@ -132,9 +135,6 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
         Y_train, Y_valid = labels.float().reshape(-1, 1, 36, 36), torch.zeros(0)
 
     if (apply_scaling):
-        with open('train_set_permutation.json', 'w') as f:
-            # Write permutation to file so that we can re-apply the same transform later
-            json.dump(p.tolist(), f)
         scaler = RobustScaler()
         scaler.fit(X_train)
         X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
