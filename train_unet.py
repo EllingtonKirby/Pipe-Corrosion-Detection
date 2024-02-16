@@ -41,8 +41,10 @@ class DiceLoss(nn.Module):
     return 1 - dice
 
 
-def train(train_dataloader, validation_dataloader, num_epochs, lr):
+def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
   model = unet.UNet(n_channels=1, n_classes=1).to(DEVICE)
+  if from_ckpt:
+    model.load_state_dict(torch.load(from_ckpt))
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceLoss().to(DEVICE)
@@ -84,4 +86,4 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
 
 if __name__ == '__main__':
   train_dl, valid_dl = build_dataloaders(build_dataframe())
-  train(train_dl, valid_dl, 100, 0.001)
+  train(train_dl, valid_dl, 50, 0.001, './unet_7.pt')
