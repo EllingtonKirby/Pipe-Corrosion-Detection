@@ -34,10 +34,10 @@ if __name__ == '__main__':
   predictions = {}
   model.eval()
   for index, x in tqdm(enumerate(test_dl)):
-    x = x.to(DEVICE)
-    out = model(x[0])
+    x = x[0].to(DEVICE)
+    out = model(x)
     preds = (F.sigmoid(out) > .5)*1.
     name = X_names[index][0]
-    predictions[name] = preds.flatten().tolist()
+    predictions[name] = preds.detach().flatten().tolist()
   preds_df = pd.DataFrame.from_dict(predictions, orient='index')
   preds_df.to_csv('KIRBY_predictions_9.csv')
