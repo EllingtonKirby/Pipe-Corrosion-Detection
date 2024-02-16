@@ -139,7 +139,8 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
         X_train, X_valid = X_train.reshape(-1, 36*36), X_valid.reshape(-1, 36*36)
         scaler.fit(X_train)
         X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
-        X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
+        if (split_train):
+            X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
 
     if apply_bulk_data_augmentations:
         examples_to_augment = X_train
