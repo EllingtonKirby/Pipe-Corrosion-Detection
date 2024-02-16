@@ -128,8 +128,8 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
         X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
         Y_train, Y_valid = labels[:offset].float().reshape(-1, 1, 36, 36), labels[offset:].float().reshape(-1, 1, 36, 36)
     else:
-        X_train, X_valid = data.float().reshape(-1, 1, 36, 36), torch.tensor()
-        Y_train, Y_valid = labels.float().reshape(-1, 1, 36, 36), torch.tensor()
+        X_train, X_valid = data.float().reshape(-1, 1, 36, 36), torch.zeros(0)
+        Y_train, Y_valid = labels.float().reshape(-1, 1, 36, 36), torch.zeros(0)
 
     if (apply_scaling):
         with open('train_set_permutation.json', 'w') as f:
