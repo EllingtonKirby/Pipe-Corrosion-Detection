@@ -101,7 +101,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
     print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
     print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
     scheduler.step(valid_iou / len(validation_dataloader))
-  torch.save(model.state_dict(), 'unet_9.pt')
+  torch.save(model.state_dict(), 'unet_10.pt')
 
 if __name__ == '__main__':
   train_dl, valid_dl = build_dataloaders(build_dataframe(use_processed_images=False), apply_scaling=False, apply_bulk_data_augmentations=False)
