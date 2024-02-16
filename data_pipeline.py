@@ -115,17 +115,21 @@ def just_image_transforms(image, label, flipper):
 
     return image, label
 
-def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentations=False):
+def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentations=False, split_train=False):
     data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
 
-    p = np.random.permutation(len(data))
-    data, labels = data[p], labels[p]
+    if split_train:
+        p = np.random.permutation(len(data))
+        data, labels = data[p], labels[p]
 
-    offset = int(len(data) * .8)
-    X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
-    Y_train, Y_valid = labels[:offset].float().reshape(-1, 1, 36, 36), labels[offset:].float().reshape(-1, 1, 36, 36)
+        offset = int(len(data) * .8)
+        X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
+        Y_train, Y_valid = labels[:offset].float().reshape(-1, 1, 36, 36), labels[offset:].float().reshape(-1, 1, 36, 36)
+    else:
+        X_train, X_valid = data.float().reshape(-1, 1, 36, 36), torch.tensor()
+        Y_train, Y_valid = labels.float().reshape(-1, 1, 36, 36), torch.tensor()
 
     if (apply_scaling):
         with open('train_set_permutation.json', 'w') as f:
