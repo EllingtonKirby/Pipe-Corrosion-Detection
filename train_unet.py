@@ -40,6 +40,25 @@ class DiceLoss(nn.Module):
     dice = (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
     return 1 - dice
 
+class DiceBCELoss(nn.Module):
+    def __init__(self, weight=None, size_average=True):
+        super(DiceBCELoss, self).__init__()
+
+    def forward(self, inputs, targets, smooth=1):
+        
+        #comment out if your model contains a sigmoid or equivalent activation layer
+        inputs = F.sigmoid(inputs)       
+        
+        #flatten label and prediction tensors
+        inputs = inputs.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = (inputs * targets).sum()                            
+        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
+        BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
+        Dice_BCE = BCE + dice_loss
+        
+        return Dice_BCE
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
   model = unet.UNet(n_channels=1, n_classes=1).to(DEVICE)
@@ -47,7 +66,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
     model.load_state_dict(torch.load(from_ckpt))
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
-  criterion = DiceLoss().to(DEVICE)
+  criterion = DiceBCELoss().to(DEVICE)
   scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)
   for e in range(num_epochs):
     train_loss = 0
