@@ -167,13 +167,19 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
 
     return train_dataloader, valid_dataloader
 
-def build_test_dataloaders(test_dataframe, train_dataframe):
+def build_test_dataloaders(test_dataframe, train_dataframe, apply_scaling=False):
     test_data = torch.from_numpy(np.vstack(test_dataframe['data'].to_numpy()))
     test_data = torch.nan_to_num(test_data)
     X_names = np.vstack(test_dataframe['filename'].to_numpy())
 
     train_data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     train_data = torch.nan_to_num(train_data)
+
+    if apply_scaling:
+        scaler = RobustScaler()
+        train_data, test_data = train_data.reshape(-1, 36*36), test_data.reshape(-1, 36*36)
+        scaler.fit(train_data)
+        test_data = torch.tensor(scaler.transform(test_data)).float().reshape(-1, 1, 36, 36)
 
     X_test = test_data.float().reshape(-1, 1, 36, 36)
     X_train = train_data.float().reshape(-1, 1, 36, 36)
