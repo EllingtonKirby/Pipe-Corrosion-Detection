@@ -93,7 +93,7 @@ def image_label_transforms(image, label, flipper):
     image = torch.roll(image, roll_distance, dims=axis)
     label = torch.roll(label, roll_distance, dims=axis)
 
-    flip = np.random.randint % 2 == 0
+    flip = np.random.randint(2) % 2 == 0
     if (flip):
         image = flipper(image)
         label = flipper(label)
