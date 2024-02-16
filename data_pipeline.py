@@ -88,7 +88,7 @@ class WellsDataset(Dataset):
         return image, label
     
 def image_label_transforms(image, label, flipper):
-    axis = 3
+    axis = 2
     roll_distance = np.random.randint(0, 36)
     image = torch.roll(image, roll_distance, dims=axis)
     label = torch.roll(label, roll_distance, dims=axis)
