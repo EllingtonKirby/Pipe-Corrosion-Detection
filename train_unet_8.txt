@@ -1,88 +1,1 @@
-/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torchvision/datapoints/__init__.py:12: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
-  warnings.warn(_BETA_TRANSFORMS_WARNING)
-/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torchvision/transforms/v2/__init__.py:54: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
-  warnings.warn(_BETA_TRANSFORMS_WARNING)
 CUDA is available and is used
-  0%|          | 0/61 [00:00<?, ?it/s]  2%|▏         | 1/61 [00:02<02:39,  2.66s/it]  8%|▊         | 5/61 [00:02<00:23,  2.37it/s] 15%|█▍        | 9/61 [00:02<00:10,  4.84it/s] 21%|██▏       | 13/61 [00:03<00:06,  7.80it/s] 28%|██▊       | 17/61 [00:03<00:03, 11.08it/s] 34%|███▍      | 21/61 [00:03<00:02, 14.64it/s] 41%|████      | 25/61 [00:03<00:01, 18.06it/s] 48%|████▊     | 29/61 [00:03<00:01, 21.41it/s] 54%|█████▍    | 33/61 [00:03<00:01, 24.33it/s] 61%|██████    | 37/61 [00:03<00:00, 26.94it/s] 67%|██████▋   | 41/61 [00:03<00:00, 28.78it/s] 74%|███████▍  | 45/61 [00:03<00:00, 30.45it/s] 80%|████████  | 49/61 [00:04<00:00, 31.62it/s] 87%|████████▋ | 53/61 [00:04<00:00, 32.06it/s] 93%|█████████▎| 57/61 [00:04<00:00, 32.69it/s]100%|██████████| 61/61 [00:04<00:00, 30.18it/s]100%|██████████| 61/61 [00:04<00:00, 13.70it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 75%|███████▌  | 12/16 [00:00<00:00, 110.06it/s]100%|██████████| 16/16 [00:00<00:00, 102.73it/s]
-Epoch: 0
-Train loss:      1.2855271100997925
-Validation loss: 1.1773823499679565
-Train intersection over union:      0.0007512737647630274
-Validation intersection over union: 0.0
-  0%|          | 0/61 [00:00<?, ?it/s]  7%|▋         | 4/61 [00:00<00:01, 35.56it/s] 13%|█▎        | 8/61 [00:00<00:01, 34.80it/s] 20%|█▉        | 12/61 [00:00<00:01, 34.69it/s] 26%|██▌       | 16/61 [00:00<00:01, 34.92it/s] 33%|███▎      | 20/61 [00:00<00:01, 34.74it/s] 39%|███▉      | 24/61 [00:00<00:01, 35.01it/s] 46%|████▌     | 28/61 [00:00<00:00, 34.83it/s] 52%|█████▏    | 32/61 [00:00<00:00, 34.89it/s] 59%|█████▉    | 36/61 [00:01<00:00, 34.76it/s] 66%|██████▌   | 40/61 [00:01<00:00, 34.83it/s] 72%|███████▏  | 44/61 [00:01<00:00, 35.02it/s] 79%|███████▊  | 48/61 [00:01<00:00, 34.53it/s] 85%|████████▌ | 52/61 [00:01<00:00, 34.59it/s] 92%|█████████▏| 56/61 [00:01<00:00, 34.41it/s] 98%|█████████▊| 60/61 [00:01<00:00, 34.55it/s]100%|██████████| 61/61 [00:01<00:00, 34.92it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 69%|██████▉   | 11/16 [00:00<00:00, 108.78it/s]100%|██████████| 16/16 [00:00<00:00, 116.61it/s]
-Epoch: 1
-Train loss:      1.1799607276916504
-Validation loss: 1.1764254570007324
-Train intersection over union:      4.104951585759409e-06
-Validation intersection over union: 0.0
-  0%|          | 0/61 [00:00<?, ?it/s]  7%|▋         | 4/61 [00:00<00:01, 35.66it/s] 13%|█▎        | 8/61 [00:00<00:01, 34.74it/s] 20%|█▉        | 12/61 [00:00<00:01, 34.97it/s] 26%|██▌       | 16/61 [00:00<00:01, 35.12it/s] 33%|███▎      | 20/61 [00:00<00:01, 35.14it/s] 39%|███▉      | 24/61 [00:00<00:01, 35.04it/s] 46%|████▌     | 28/61 [00:00<00:00, 34.76it/s] 52%|█████▏    | 32/61 [00:00<00:00, 34.81it/s] 59%|█████▉    | 36/61 [00:01<00:00, 34.44it/s] 66%|██████▌   | 40/61 [00:01<00:00, 35.02it/s] 72%|███████▏  | 44/61 [00:01<00:00, 34.92it/s] 79%|███████▊  | 48/61 [00:01<00:00, 34.95it/s] 85%|████████▌ | 52/61 [00:01<00:00, 34.89it/s] 92%|█████████▏| 56/61 [00:01<00:00, 34.92it/s] 98%|█████████▊| 60/61 [00:01<00:00, 35.02it/s]100%|██████████| 61/61 [00:01<00:00, 35.09it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 75%|███████▌  | 12/16 [00:00<00:00, 115.90it/s]100%|██████████| 16/16 [00:00<00:00, 118.87it/s]
-Epoch: 2
-Train loss:      1.17946457862854
-Validation loss: 1.1763755083084106
-Train intersection over union:      6.321223918348551e-05
-Validation intersection over union: 5.3332196330302395e-06
-  0%|          | 0/61 [00:00<?, ?it/s]  7%|▋         | 4/61 [00:00<00:01, 34.44it/s] 13%|█▎        | 8/61 [00:00<00:01, 34.08it/s] 20%|█▉        | 12/61 [00:00<00:01, 34.66it/s] 26%|██▌       | 16/61 [00:00<00:01, 34.35it/s] 33%|███▎      | 20/61 [00:00<00:01, 35.01it/s] 39%|███▉      | 24/61 [00:00<00:01, 34.08it/s] 46%|████▌     | 28/61 [00:00<00:00, 34.32it/s] 52%|█████▏    | 32/61 [00:00<00:00, 34.39it/s] 59%|█████▉    | 36/61 [00:01<00:00, 34.63it/s] 66%|██████▌   | 40/61 [00:01<00:00, 34.37it/s] 72%|███████▏  | 44/61 [00:01<00:00, 32.47it/s] 79%|███████▊  | 48/61 [00:01<00:00, 32.11it/s] 85%|████████▌ | 52/61 [00:01<00:00, 31.74it/s] 92%|█████████▏| 56/61 [00:01<00:00, 31.45it/s] 98%|█████████▊| 60/61 [00:01<00:00, 31.17it/s]100%|██████████| 61/61 [00:01<00:00, 33.20it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 69%|██████▉   | 11/16 [00:00<00:00, 104.70it/s]100%|██████████| 16/16 [00:00<00:00, 109.57it/s]
-Epoch: 3
-Train loss:      1.1792025566101074
-Validation loss: 1.1767048835754395
-Train intersection over union:      6.445320468628779e-05
-Validation intersection over union: 2.641649371071253e-05
-  0%|          | 0/61 [00:00<?, ?it/s]  7%|▋         | 4/61 [00:00<00:01, 30.12it/s] 13%|█▎        | 8/61 [00:00<00:01, 30.71it/s] 20%|█▉        | 12/61 [00:00<00:01, 30.77it/s] 26%|██▌       | 16/61 [00:00<00:01, 31.08it/s] 33%|███▎      | 20/61 [00:00<00:01, 30.85it/s] 39%|███▉      | 24/61 [00:00<00:01, 30.81it/s] 46%|████▌     | 28/61 [00:00<00:01, 30.93it/s] 52%|█████▏    | 32/61 [00:01<00:00, 30.78it/s] 59%|█████▉    | 36/61 [00:01<00:00, 30.73it/s] 66%|██████▌   | 40/61 [00:01<00:00, 30.68it/s] 72%|███████▏  | 44/61 [00:01<00:00, 30.75it/s] 79%|███████▊  | 48/61 [00:01<00:00, 30.88it/s] 85%|████████▌ | 52/61 [00:01<00:00, 30.76it/s] 92%|█████████▏| 56/61 [00:01<00:00, 30.80it/s] 98%|█████████▊| 60/61 [00:01<00:00, 30.66it/s]100%|██████████| 61/61 [00:01<00:00, 30.92it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 69%|██████▉   | 11/16 [00:00<00:00, 108.12it/s]100%|██████████| 16/16 [00:00<00:00, 111.59it/s]
-Epoch: 4
-Train loss:      1.1793538331985474
-Validation loss: 1.1770567893981934
-Train intersection over union:      1.602525298949331e-05
-Validation intersection over union: 1.0562469469732605e-05
-  0%|          | 0/61 [00:00<?, ?it/s]  5%|▍         | 3/61 [00:00<00:01, 29.88it/s] 11%|█▏        | 7/61 [00:00<00:01, 31.63it/s] 18%|█▊        | 11/61 [00:00<00:01, 31.99it/s] 25%|██▍       | 15/61 [00:00<00:01, 32.39it/s] 31%|███       | 19/61 [00:00<00:01, 32.62it/s] 38%|███▊      | 23/61 [00:00<00:01, 29.94it/s] 44%|████▍     | 27/61 [00:00<00:01, 29.62it/s] 49%|████▉     | 30/61 [00:01<00:01, 27.12it/s] 56%|█████▌    | 34/61 [00:01<00:00, 28.14it/s] 62%|██████▏   | 38/61 [00:01<00:00, 29.09it/s] 67%|██████▋   | 41/61 [00:01<00:00, 29.17it/s] 74%|███████▍  | 45/61 [00:01<00:00, 29.79it/s] 79%|███████▊  | 48/61 [00:01<00:00, 29.84it/s] 85%|████████▌ | 52/61 [00:01<00:00, 30.25it/s] 92%|█████████▏| 56/61 [00:01<00:00, 30.55it/s] 98%|█████████▊| 60/61 [00:01<00:00, 30.82it/s]100%|██████████| 61/61 [00:02<00:00, 30.29it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 69%|██████▉   | 11/16 [00:00<00:00, 109.42it/s]100%|██████████| 16/16 [00:00<00:00, 112.98it/s]
-Epoch: 5
-Train loss:      1.178561806678772
-Validation loss: 1.1766645908355713
-Train intersection over union:      0.0013260450214147568
-Validation intersection over union: 9.04676562640816e-05
-  0%|          | 0/61 [00:00<?, ?it/s]  5%|▍         | 3/61 [00:00<00:01, 29.32it/s] 11%|█▏        | 7/61 [00:00<00:01, 30.68it/s] 18%|█▊        | 11/61 [00:00<00:01, 30.90it/s] 25%|██▍       | 15/61 [00:00<00:01, 30.82it/s] 31%|███       | 19/61 [00:00<00:01, 30.96it/s] 38%|███▊      | 23/61 [00:00<00:01, 30.84it/s] 44%|████▍     | 27/61 [00:00<00:01, 31.15it/s] 51%|█████     | 31/61 [00:01<00:00, 30.92it/s] 57%|█████▋    | 35/61 [00:01<00:00, 30.88it/s] 64%|██████▍   | 39/61 [00:01<00:00, 31.13it/s] 70%|███████   | 43/61 [00:01<00:00, 31.16it/s] 77%|███████▋  | 47/61 [00:01<00:00, 30.97it/s] 84%|████████▎ | 51/61 [00:01<00:00, 30.89it/s] 90%|█████████ | 55/61 [00:01<00:00, 30.82it/s] 97%|█████████▋| 59/61 [00:01<00:00, 30.82it/s]100%|██████████| 61/61 [00:01<00:00, 31.10it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 69%|██████▉   | 11/16 [00:00<00:00, 108.52it/s]100%|██████████| 16/16 [00:00<00:00, 111.62it/s]
-Epoch: 6
-Train loss:      1.1787256002426147
-Validation loss: 1.176996111869812
-Train intersection over union:      0.00035641019348986447
-Validation intersection over union: 0.0002691069967113435
-  0%|          | 0/61 [00:00<?, ?it/s]  5%|▍         | 3/61 [00:00<00:01, 29.51it/s] 10%|▉         | 6/61 [00:00<00:01, 29.73it/s] 16%|█▋        | 10/61 [00:00<00:01, 30.17it/s] 23%|██▎       | 14/61 [00:00<00:01, 30.39it/s] 30%|██▉       | 18/61 [00:00<00:01, 30.58it/s] 36%|███▌      | 22/61 [00:00<00:01, 30.65it/s] 43%|████▎     | 26/61 [00:00<00:01, 30.59it/s] 49%|████▉     | 30/61 [00:00<00:01, 30.70it/s] 56%|█████▌    | 34/61 [00:01<00:00, 30.79it/s] 62%|██████▏   | 38/61 [00:01<00:00, 30.81it/s] 69%|██████▉   | 42/61 [00:01<00:00, 31.01it/s] 75%|███████▌  | 46/61 [00:01<00:00, 31.12it/s] 82%|████████▏ | 50/61 [00:01<00:00, 31.23it/s] 89%|████████▊ | 54/61 [00:01<00:00, 31.07it/s] 95%|█████████▌| 58/61 [00:01<00:00, 30.91it/s]100%|██████████| 61/61 [00:01<00:00, 30.99it/s]
-  0%|          | 0/16 [00:00<?, ?it/s] 69%|██████▉   | 11/16 [00:00<00:00, 105.00it/s]100%|██████████| 16/16 [00:00<00:00, 111.12it/s]
-Epoch: 7
-Train loss:      1.178688645362854
-Validation loss: 1.1771981716156006
-Train intersection over union:      0.0021411182824522257
-Validation intersection over union: 1.092561797122471e-05
-  0%|          | 0/61 [00:00<?, ?it/s]  5%|▍         | 3/61 [00:00<00:01, 29.39it/s] 11%|█▏        | 7/61 [00:00<00:01, 30.96it/s] 18%|█▊        | 11/61 [00:00<00:01, 30.75it/s] 25%|██▍       | 15/61 [00:00<00:01, 30.58it/s] 31%|███       | 19/61 [00:00<00:02, 19.82it/s] 36%|███▌      | 22/61 [00:01<00:02, 16.01it/s] 39%|███▉      | 24/61 [00:01<00:02, 13.61it/s] 43%|████▎     | 26/61 [00:01<00:03, 11.37it/s] 46%|████▌     | 28/61 [00:01<00:03, 10.00it/s] 49%|████▉     | 30/61 [00:02<00:03,  8.90it/s] 51%|█████     | 31/61 [00:02<00:03,  8.79it/s] 52%|█████▏    | 32/61 [00:02<00:03,  8.92it/s] 57%|█████▋    | 35/61 [00:02<00:02,  9.41it/s] 61%|██████    | 37/61 [00:02<00:02, 10.21it/s] 64%|██████▍   | 39/61 [00:02<00:01, 11.03it/s] 67%|██████▋   | 41/61 [00:03<00:02,  9.98it/s] 69%|██████▉   | 42/61 [00:03<00:01, 12.09it/s]
-Traceback (most recent call last):
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/Pipe-Corrosion-Detection/train_unet.py", line 108, in <module>
-    train(train_dl, valid_dl, 100, 0.001)
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/Pipe-Corrosion-Detection/train_unet.py", line 74, in train
-    for input, labels in tqdm(iter(train_dataloader)):
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/tqdm/std.py", line 1195, in __iter__
-    for obj in iterable:
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 633, in __next__
-    data = self._next_data()
-           ^^^^^^^^^^^^^^^^^
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torch/utils/data/dataloader.py", line 677, in _next_data
-    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
-    data = [self.dataset[idx] for idx in possibly_batched_index]
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torch/utils/data/_utils/fetch.py", line 51, in <listcomp>
-    data = [self.dataset[idx] for idx in possibly_batched_index]
-            ~~~~~~~~~~~~^^^^^
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/Pipe-Corrosion-Detection/data_pipeline.py", line 87, in __getitem__
-    image, label = self.transform(image, label, self.flipper)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/Pipe-Corrosion-Detection/data_pipeline.py", line 93, in image_label_transforms
-    image = torch.roll(image, roll_distance, dims=axis)
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-KeyboardInterrupt
