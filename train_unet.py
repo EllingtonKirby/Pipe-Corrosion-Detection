@@ -104,7 +104,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'unet_12.pt')
+  torch.save(model.state_dict(), 'unet_13.pt')
 
 if __name__ == '__main__':
   train_dl, valid_dl = build_dataloaders(build_dataframe(use_processed_images=False), apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
