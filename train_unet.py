@@ -107,5 +107,5 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
   torch.save(model.state_dict(), 'unet_11.pt')
 
 if __name__ == '__main__':
-  train_dl, valid_dl = build_dataloaders(build_dataframe(use_processed_images=False), apply_scaling=False, apply_bulk_data_augmentations=False, split_train=False)
+  train_dl, valid_dl = build_dataloaders(build_dataframe(use_processed_images=False), apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
   train(train_dl, valid_dl, 50, 0.001)
