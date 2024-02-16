@@ -129,4 +129,4 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
 
 if __name__ == '__main__':
   train_dl, valid_dl = build_dataloaders(build_dataframe())
-  train(train_dl, valid_dl, 30, 0.001)
+  train(train_dl, valid_dl, 100, 0.001)
