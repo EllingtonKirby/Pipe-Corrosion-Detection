@@ -136,6 +136,7 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
 
     if (apply_scaling):
         scaler = RobustScaler()
+        X_train, X_valid = X_train.reshape(-1, 36*36), X_valid.reshape(-1, 36*36)
         scaler.fit(X_train)
         X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
         X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
