@@ -62,8 +62,8 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
     print(f'Train accuracy:      {train_acc/ len(train_dataloader)}')
     print(f'Validation accuracy: {valid_acc/ len(validation_dataloader)}')
     scheduler.step(valid_acc / len(validation_dataloader), e)
-  torch.save(model.state_dict(), 'well_classifier_2.pt')
+  torch.save(model.state_dict(), 'well_classifier_3.pt')
 
 if __name__ == '__main__':
-  train_dl, valid_dl = build_dataloaders_for_classiication(build_dataframe())
-  train(train_dl, valid_dl, 30, 0.001)
+  train_dl, valid_dl = build_dataloaders_for_classiication(build_dataframe(use_processed_images=False), apply_scaling=False, apply_bulk_data_augmentations=False)
+  train(train_dl, valid_dl, 50, 0.001)
