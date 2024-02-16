@@ -1,24 +1,10 @@
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, Dataset, random_split, TensorDataset
-from torchvision.transforms import functional as VF
-from torchmetrics.classification import BinaryJaccardIndex
-from torchvision import models, datasets, tv_tensors
-from torchvision.transforms import v2
+from torch.utils.data import DataLoader, TensorDataset
 import pandas as pd
-import pandas as pd
-import numpy as np
-import os
-import re
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import RobustScaler
 from tqdm import tqdm
-import random
 import data_pipeline
 import unet
-import baseline
-import json
 
 if __name__ == '__main__':
   model = unet.UNet(n_channels=1, n_classes=1)
