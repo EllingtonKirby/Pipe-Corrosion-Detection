@@ -125,7 +125,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
     print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
     print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
     scheduler.step(valid_iou / len(validation_dataloader), e)
-  torch.save(model.state_dict(), 'baseline_model_1.pt')
+  torch.save(model.state_dict(), 'baseline_model_2.pt')
 
 if __name__ == '__main__':
   train_dl, valid_dl = build_dataloaders(build_dataframe())
