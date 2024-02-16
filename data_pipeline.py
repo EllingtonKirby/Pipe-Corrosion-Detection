@@ -51,24 +51,28 @@ def build_dataframe(use_processed_images=True):
     merged = merged.drop(merged.loc[outliers.tolist()].index)
     return merged
 
-def build_test_dataframe():
-  data_dir = './test/images/'
-  data_dict = []
-  pattern = r'well_(\d+)_patch_(\d+)\.npy'
-  for i, filename in enumerate(os.listdir(data_dir)):
-      example = np.load(data_dir + filename)
-      match = re.match(pattern, filename)
-      name = filename[:-4]
-      if match:
-          well_number = int(match.group(1))  # Extract well number
-          patch_number = int(match.group(2)) # Extract patch number
-      else:
-          print("Filename format does not match the expected pattern.")  
+def build_test_dataframe(use_processed_images=True):
+    if use_processed_images:
+        data_dir = './test/processed_images/'
+    else:
+        data_dir = './test/images/'
 
-      data_dict.append((name, well_number, patch_number, example.flatten()))
+    data_dict = []
+    pattern = r'well_(\d+)_patch_(\d+)\.npy'
+    for i, filename in enumerate(os.listdir(data_dir)):
+        example = np.load(data_dir + filename)
+        match = re.match(pattern, filename)
+        name = filename[:-4]
+        if match:
+            well_number = int(match.group(1))  # Extract well number
+            patch_number = int(match.group(2)) # Extract patch number
+        else:
+            print("Filename format does not match the expected pattern.")  
 
-  df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
-  return df.sort_values(by=['well_number','patch_number'])
+        data_dict.append((name, well_number, patch_number, example.flatten()))
+
+    df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
+    return df.sort_values(by=['well_number','patch_number'])
 class WellsDataset(Dataset):
     def __init__(self, data, labels, transform):
         self.data = data
@@ -97,6 +101,17 @@ def image_label_transforms(image, label, flipper):
     if (flip):
         image = flipper(image)
         label = flipper(label)
+
+    return image, label
+
+def just_image_transforms(image, label, flipper):
+    axis = 2
+    roll_distance = np.random.randint(0, 36)
+    image = torch.roll(image, roll_distance, dims=axis)
+
+    flip = np.random.randint(2) % 2 == 0
+    if (flip):
+        image = flipper(image)
 
     return image, label
 
@@ -146,6 +161,19 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
 
     return train_dataloader, valid_dataloader
 
+def build_test_dataloaders(test_dataframe, train_dataframe):
+    test_data = torch.from_numpy(np.vstack(test_dataframe['data'].to_numpy()))
+    test_data = torch.nan_to_num(test_data)
+    X_names = np.vstack(test_dataframe['filename'].to_numpy())
+
+    train_data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
+    train_data = torch.nan_to_num(train_data)
+
+    X_test = test_data.float().reshape(-1, 1, 36, 36)
+    X_train = train_data.float().reshape(-1, 1, 36, 36)
+    return X_test, X_names, X_train
+
+
 def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False, apply_bulk_data_augmentations=False):
     data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
@@ -154,7 +182,7 @@ def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False, ap
     p = np.random.permutation(len(data))
 
     data, labels = data[p], labels[p]
-    offset = int(len(data) * .5)
+    offset = int(len(data) * .8)
     X_train, X_valid = data[:offset], data[offset:]
     Y_train, Y_valid = labels[:offset], labels[offset:]
 
@@ -183,7 +211,7 @@ def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False, ap
         train_dataset = WellsDataset(X_train, Y_train, None)
         valid_dataset = WellsDataset(X_valid, Y_valid, None)
     else:
-        train_dataset = WellsDataset(X_train, Y_train, image_label_transforms)
+        train_dataset = WellsDataset(X_train, Y_train, just_image_transforms)
         valid_dataset = WellsDataset(X_valid, Y_valid, None)
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
