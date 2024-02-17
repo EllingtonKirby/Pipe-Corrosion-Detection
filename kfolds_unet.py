@@ -1,4 +1,5 @@
 import torch
+from torch.utils.data import DataLoader
 import numpy as np
 import train_unet
 import unet
@@ -33,11 +34,14 @@ def main():
       X_train, X_valid = X_train.float().reshape(-1, 1, 36, 36), X_valid.float().reshape(-1, 1, 36, 36)
       Y_train, Y_valid = Y_train.reshape(-1, 1, 36, 36), Y_valid.reshape(-1, 1, 36, 36)
 
-      train_dl = data_pipeline.WellsDataset(X_train, Y_train, transform=data_pipeline.image_label_transforms)
-      valid_dl = data_pipeline.WellsDataset(X_valid, Y_valid, transform=None)
+      train_dataset = data_pipeline.WellsDataset(X_train, Y_train, transform=data_pipeline.image_label_transforms)
+      valid_dataset = data_pipeline.WellsDataset(X_valid, Y_valid, transform=None)
+
+      train_dataloader = DataLoader(train_dataset, batch_size=128)
+      valid_dataloader = DataLoader(valid_dataset, batch_size=128)
       
       # Train
-      _, _, _, valid_losses, valid_metrics = train_unet.train_local(model, train_dl, valid_dl, lr=.001, num_epochs=100)
+      _, _, _, valid_losses, valid_metrics = train_unet.train_local(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=100)
       model_losses.append(valid_losses[-1])
       model_metrics.append(valid_metrics[-1])
 
