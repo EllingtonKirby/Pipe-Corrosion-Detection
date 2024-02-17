@@ -106,6 +106,58 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(train_iou / len(train_dataloader))
   torch.save(model.state_dict(), 'unet_13.pt')
 
+def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
+  metric = BinaryJaccardIndex().to(DEVICE)
+  criterion = DiceBCELoss().to(DEVICE)
+  optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
+  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)
+
+  train_losses = []
+  train_ious = []
+  valid_losses = []
+  valid_ious = []
+
+  for e in range(num_epochs):
+    train_loss = 0
+    train_iou = 0
+    for input, labels in tqdm(iter(train_dataloader)):
+      input = input.to(DEVICE)
+      labels = labels.to(DEVICE)
+      optimizer.zero_grad()
+      preds = model(input)
+      loss = criterion(preds, labels)
+      iou = metric(preds, labels)
+      train_loss += loss
+      train_iou += iou
+      loss.backward()
+      optimizer.step()
+
+    valid_loss = 0
+    valid_iou = 0
+    with torch.no_grad():
+      for input, labels in tqdm(iter(validation_dataloader)):
+        input = input.to(DEVICE)
+        labels = labels.to(DEVICE)
+        preds = model(input)
+        loss = criterion(preds, labels)
+        iou = metric(preds, labels)
+        valid_loss += loss
+        valid_iou += iou
+    
+    train_losses.append(train_loss / len(train_dataloader))
+    train_ious.append(train_iou/ len(train_dataloader))
+    valid_losses.append(valid_loss/ len(validation_dataloader))
+    valid_ious.append(valid_iou/ len(validation_dataloader))
+
+    print(f'Epoch: {e}')
+    print(f'Train loss:      {train_losses[-1]}')
+    print(f'Validation loss: {valid_losses[-1]}')
+    print(f'Train intersection over union:      {train_ious[-1]}')
+    print(f'Validation intersection over union: {valid_ious[-1]}')
+    scheduler.step(valid_losses[-1])
+    
+  return model, train_losses, train_ious, valid_losses, valid_ious 
+
 if __name__ == '__main__':
   train_dl, valid_dl = build_dataloaders(build_dataframe(use_processed_images=False), apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
   train(train_dl, valid_dl, 50, 0.001)
