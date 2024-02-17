@@ -46,7 +46,7 @@ def build_dataframe(use_processed_images=True):
 
     data = torch.from_numpy(np.vstack(merged['data'].to_numpy(dtype=np.ndarray)))
     # Remove corruputed samples
-    outliers = ((data.min(dim=1, keepdim=True).values == -999.2500) == True).flatten()
+    outliers = ((data.min(dim=1, keepdim=True).values < -10) == True).flatten()
 
     merged = merged.drop(merged.loc[outliers.tolist()].index)
     return merged
