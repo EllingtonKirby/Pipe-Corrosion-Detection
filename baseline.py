@@ -128,9 +128,9 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'baseline_model_4.pt')
+  torch.save(model.state_dict(), 'baseline_model_5.pt')
 
 if __name__ == '__main__':
-  df = build_dataframe(use_processed_images=False, limit_well_number=3)
+  df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  train(train_dl, valid_dl, 100, 0.001)
+  train(train_dl, valid_dl, 30, 0.001)
