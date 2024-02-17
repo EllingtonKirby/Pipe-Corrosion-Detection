@@ -12,7 +12,7 @@ def main():
   X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   X = torch.nan_to_num(X)
   Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
-  splits = KFold(n_splits=5).split(X=X, y=Y)
+  splits = KFold(n_splits=5)
 
   models = [1, 2, 3, 4] # Number of UNet steps
 
@@ -22,7 +22,7 @@ def main():
     model = unet.UNet(n_channels=1, n_classes=1, n_steps=steps).to(torch.device('cuda:0'))
     model_losses = []
     model_metrics = []
-    for fold, (train_indices, valid_indices) in enumerate(splits):
+    for fold, (train_indices, valid_indices) in enumerate(splits.split(X=X, y=Y)):
       print("-"*100)
       print(f"Unet with Steps: {model.n_steps}, Fold: {fold}")
       X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)
@@ -42,8 +42,10 @@ def main():
       
       # Train
       _, _, _, valid_losses, valid_metrics = train_unet.train_local(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=100)
-      model_losses.append(valid_losses[-1].cpu().detach())
-      model_metrics.append(valid_metrics[-1].cpu().detach())
+      model_losses.append(valid_losses[-1])
+      sanity_check = np.mean(model_losses)
+      model_metrics.append(valid_metrics[-1])
+      sanity_check = np.mean(model_metrics)
 
     per_model_losses[model.n_steps] = np.mean(model_losses)
     per_model_metrics[model.n_steps] = np.mean(model_metrics)

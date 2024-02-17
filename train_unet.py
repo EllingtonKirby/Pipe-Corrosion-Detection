@@ -144,10 +144,10 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
         valid_loss += loss
         valid_iou += iou
     
-    train_losses.append(train_loss / len(train_dataloader))
-    train_ious.append(train_iou/ len(train_dataloader))
-    valid_losses.append(valid_loss/ len(validation_dataloader))
-    valid_ious.append(valid_iou/ len(validation_dataloader))
+    train_losses.append(train_loss.item() / len(train_dataloader))
+    train_ious.append(train_iou.item() / len(train_dataloader))
+    valid_losses.append(valid_loss.item() / len(validation_dataloader))
+    valid_ious.append(valid_iou.item() / len(validation_dataloader))
 
     print(f'Epoch: {e}')
     print(f'Train loss:      {train_losses[-1]}')
