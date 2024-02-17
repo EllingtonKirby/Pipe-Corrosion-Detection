@@ -11,25 +11,20 @@ def main():
   X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   X = torch.nan_to_num(X)
   Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
-  splits = KFold(n_splits=5, shuffle=True).split(X=X, y=Y)
+  splits = KFold(n_splits=5).split(X=X, y=Y)
 
-  models = [
-    unet.UNet(1, 1, n_steps=1),
-    unet.UNet(1, 1, n_steps=2),
-    unet.UNet(1, 1, n_steps=3),
-    unet.UNet(1, 1, n_steps=4),
-  ]
+  models = [1, 2, 3, 4] # Number of UNet steps
 
   per_model_losses = {}
   per_model_metrics = {}
-  for model in models:
-    model.to(torch.device('cuda:0'))
+  for steps in models:
+    model = unet.UNet(n_channels=1, n_classes=1, n_steps=steps).to(torch.device('cuda:0'))
     model_losses = []
     model_metrics = []
     for fold, (train_indices, valid_indices) in enumerate(splits):
       print("-"*100)
       print(f"Unet with Steps: {model.n_steps}, Fold: {fold}")
-      X_train, X_valid = X[train_indices].float().reshape(1, -1), X[valid_indices].float().reshape(1, -1)
+      X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)
       Y_train, Y_valid = Y[train_indices].float(), Y[valid_indices].float()
 
       # Scale
