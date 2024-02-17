@@ -18,11 +18,11 @@ def main():
 
   per_model_losses = {}
   per_model_metrics = {}
-  for steps in models:
-    model = unet.UNet(n_channels=1, n_classes=1, n_steps=steps).to(torch.device('cuda:0'))
+  for steps in models:    
     model_losses = []
     model_metrics = []
     for fold, (train_indices, valid_indices) in enumerate(splits.split(X=X, y=Y)):
+      model = unet.UNet(n_channels=1, n_classes=1, n_steps=steps).to(torch.device('cuda:0'))
       print("-"*100)
       print(f"Unet with Steps: {model.n_steps}, Fold: {fold}")
       X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)
@@ -43,9 +43,7 @@ def main():
       # Train
       _, _, _, valid_losses, valid_metrics = train_unet.train_local(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=100)
       model_losses.append(valid_losses[-1])
-      sanity_check = np.mean(model_losses)
       model_metrics.append(valid_metrics[-1])
-      sanity_check = np.mean(model_metrics)
 
     per_model_losses[model.n_steps] = np.mean(model_losses)
     per_model_metrics[model.n_steps] = np.mean(model_metrics)
