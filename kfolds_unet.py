@@ -42,11 +42,11 @@ def main():
       
       # Train
       _, _, _, valid_losses, valid_metrics = train_unet.train_local(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=100)
-      model_losses.append(valid_losses[-1])
-      model_metrics.append(valid_metrics[-1])
+      model_losses.append(valid_losses[-1].cpu().detach())
+      model_metrics.append(valid_metrics[-1].cpu().detach())
 
-    per_model_losses[model.n_steps] = np.mean(model_losses.cpu().detach())
-    per_model_metrics[model.n_steps] = np.mean(model_metrics.cpu().detach())
+    per_model_losses[model.n_steps] = np.mean(model_losses)
+    per_model_metrics[model.n_steps] = np.mean(model_metrics)
     print(f"Finish folds for Model with Steps: {model.n_steps}")
     print(f"Average Loss: {per_model_losses[model.n_steps]}")
     print(f"Average IoU   {per_model_metrics[model.n_steps]}")
