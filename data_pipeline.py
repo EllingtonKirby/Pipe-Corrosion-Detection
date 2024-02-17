@@ -54,7 +54,7 @@ def build_dataframe(use_processed_images=True, limit_well_number=None):
 
     return merged
 
-def build_test_dataframe(use_processed_images=True, well_number=None):
+def build_test_dataframe(use_processed_images=True, limit_well_number=None):
     if use_processed_images:
         data_dir = './test/processed_images/'
     else:
@@ -76,12 +76,9 @@ def build_test_dataframe(use_processed_images=True, well_number=None):
 
     df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
     data = torch.from_numpy(np.vstack(df['data'].to_numpy(dtype=np.ndarray)))
-    # Remove corruputed samples
-    outliers = ((data.min(dim=1, keepdim=True).values < -10) == True).flatten()
-    df = df.drop(df.loc[outliers.tolist()].index)
 
-    if well_number != None:
-        df = df[df['well_number'] == well_number]
+    if limit_well_number != None:
+        df = df[df['well_number'] == limit_well_number]
 
     return df
 class WellsDataset(Dataset):
