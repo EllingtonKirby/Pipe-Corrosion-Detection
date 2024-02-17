@@ -131,6 +131,6 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
   torch.save(model.state_dict(), 'baseline_model_4.pt')
 
 if __name__ == '__main__':
-  df = build_dataframe(use_processed_images=False, well_number=5)
+  df = build_dataframe(use_processed_images=False, limit_well_number=5)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
   train(train_dl, valid_dl, 30, 0.001)
