@@ -11,7 +11,7 @@ from sklearn.preprocessing import RobustScaler
 import json
 torchvision.disable_beta_transforms_warning()
     
-def build_dataframe(use_processed_images=True):
+def build_dataframe(use_processed_images=True, well_number=None):
     if use_processed_images:
         data_dir = './train/processed_images/'
     else:
@@ -19,7 +19,7 @@ def build_dataframe(use_processed_images=True):
     data_dict = []
     pattern = r'well_(\d+)_patch_(\d+)\.npy'
     for i, filename in enumerate(os.listdir(data_dir)):
-        example = np.load(data_dir + filename)
+        example = np.nan_to_num(np.load(data_dir + filename))
         match = re.match(pattern, filename)
         if match:
             well_number = int(match.group(1))  # Extract well number
@@ -47,11 +47,13 @@ def build_dataframe(use_processed_images=True):
     data = torch.from_numpy(np.vstack(merged['data'].to_numpy(dtype=np.ndarray)))
     # Remove corruputed samples
     outliers = ((data.min(dim=1, keepdim=True).values < -10) == True).flatten()
-
     merged = merged.drop(merged.loc[outliers.tolist()].index)
+
+    if well_number != None:
+        merged = merged[merged['well_number'] == well_number]
     return merged
 
-def build_test_dataframe(use_processed_images=True):
+def build_test_dataframe(use_processed_images=True, well_number=None):
     if use_processed_images:
         data_dir = './test/processed_images/'
     else:
@@ -60,7 +62,7 @@ def build_test_dataframe(use_processed_images=True):
     data_dict = []
     pattern = r'well_(\d+)_patch_(\d+)\.npy'
     for i, filename in enumerate(os.listdir(data_dir)):
-        example = np.load(data_dir + filename)
+        example = np.nan_to_num(np.load(data_dir + filename))
         match = re.match(pattern, filename)
         name = filename[:-4]
         if match:
@@ -72,7 +74,15 @@ def build_test_dataframe(use_processed_images=True):
         data_dict.append((name, well_number, patch_number, example.flatten()))
 
     df = pd.DataFrame(data=data_dict, columns=['filename', 'well_number', 'patch_number', 'data'])
-    return df.sort_values(by=['well_number','patch_number'])
+    data = torch.from_numpy(np.vstack(df['data'].to_numpy(dtype=np.ndarray)))
+    # Remove corruputed samples
+    outliers = ((data.min(dim=1, keepdim=True).values < -10) == True).flatten()
+    df = df.drop(df.loc[outliers.tolist()].index)
+
+    if well_number != None:
+        df = df[df['well_number'] == well_number]
+
+    return df
 class WellsDataset(Dataset):
     def __init__(self, data, labels, transform):
         self.data = data
@@ -135,9 +145,8 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
         Y_train, Y_valid = labels.float().reshape(-1, 1, 36, 36), torch.zeros(0)
 
     if (apply_scaling):
-        scaler = RobustScaler()
         X_train, X_valid = X_train.reshape(-1, 36*36), X_valid.reshape(-1, 36*36)
-        scaler.fit(X_train)
+        scaler = RobustScaler().fit(X_train)
         X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
         if (split_train):
             X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
@@ -174,16 +183,17 @@ def build_test_dataloaders(test_dataframe, train_dataframe, apply_scaling=False)
 
     train_data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     train_data = torch.nan_to_num(train_data)
+    Y_train = torch.from_numpy(np.vstack(train_dataframe['labels'].to_numpy()))
 
     if apply_scaling:
-        scaler = RobustScaler()
         train_data, test_data = train_data.reshape(-1, 36*36), test_data.reshape(-1, 36*36)
-        scaler.fit(train_data)
+        scaler = RobustScaler().fit(train_data)
+        train_data = torch.tensor(scaler.transform(train_data)).float().reshape(-1, 1, 36, 36)
         test_data = torch.tensor(scaler.transform(test_data)).float().reshape(-1, 1, 36, 36)
 
     X_test = test_data.float().reshape(-1, 1, 36, 36)
     X_train = train_data.float().reshape(-1, 1, 36, 36)
-    return X_test, X_names, X_train
+    return X_test, X_names, X_train, Y_train
 
 
 def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False, apply_bulk_data_augmentations=False):
