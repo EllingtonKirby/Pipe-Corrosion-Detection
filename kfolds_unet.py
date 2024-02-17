@@ -30,7 +30,7 @@ def main():
       # Scale
       scaler = RobustScaler().fit(X_train)
       X_train, X_valid = torch.from_numpy(scaler.transform(X_train)), torch.from_numpy(scaler.transform(X_valid))
-      X_train, X_valid = X_train.reshape(-1, 1, 36, 36), X_valid.reshape(-1, 1, 36, 36)
+      X_train, X_valid = X_train.float().reshape(-1, 1, 36, 36), X_valid.float().reshape(-1, 1, 36, 36)
       Y_train, Y_valid = Y_train.reshape(-1, 1, 36, 36), Y_valid.reshape(-1, 1, 36, 36)
 
       train_dl = data_pipeline.WellsDataset(X_train, Y_train, transform=data_pipeline.image_label_transforms)
