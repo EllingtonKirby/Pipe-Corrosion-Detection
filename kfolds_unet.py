@@ -45,11 +45,11 @@ def main():
       model_losses.append(valid_losses[-1])
       model_metrics.append(valid_metrics[-1])
 
-    per_model_losses[model.n_steps] = np.mean(model_losses)
-    per_model_metrics[model.n_steps] = np.mean(model_metrics)
-    print(f"Finish folds for Model with Steps: {model.n_steps}")
-    print(f"Average Loss: {per_model_losses[model.n_steps]}")
-    print(f"Average IoU   {per_model_metrics[model.n_steps]}")
+    per_model_losses[steps] = np.mean(model_losses)
+    per_model_metrics[steps] = np.mean(model_metrics)
+    print(f"Finish folds for Model with Steps: {steps}")
+    print(f"Average Loss: {per_model_losses[steps]}")
+    print(f"Average IoU   {per_model_metrics[steps]}")
   
   print("-"*100)
   print("Finished full KFolds testing")
