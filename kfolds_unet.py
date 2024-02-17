@@ -23,6 +23,7 @@ def main():
   per_model_losses = {}
   per_model_metrics = {}
   for model in models:
+    model.to(torch.device('cuda:0'))
     model_losses = []
     model_metrics = []
     for fold, (train_indices, valid_indices) in enumerate(splits):
@@ -44,7 +45,7 @@ def main():
       _, _, _, valid_losses, valid_metrics = train_unet.train_local(model, train_dl, valid_dl, lr=.001, num_epochs=100)
       model_losses.append(valid_losses[-1])
       model_metrics.append(valid_metrics[-1])
-      
+
     per_model_losses[model.n_steps] = torch.mean(model_losses)
     per_model_metrics[model.n_steps] = torch.mean(model_metrics)
     print(f"Finish folds for Model with Steps: {model.n_steps}")
