@@ -11,7 +11,7 @@ from sklearn.preprocessing import RobustScaler
 import json
 torchvision.disable_beta_transforms_warning()
     
-def build_dataframe(use_processed_images=True, well_number=None):
+def build_dataframe(use_processed_images=True, limit_well_number=None):
     if use_processed_images:
         data_dir = './train/processed_images/'
     else:
@@ -49,8 +49,9 @@ def build_dataframe(use_processed_images=True, well_number=None):
     outliers = ((data.min(dim=1, keepdim=True).values < -10) == True).flatten()
     merged = merged.drop(merged.loc[outliers.tolist()].index)
 
-    if well_number != None:
-        merged = merged[merged['well_number'] == well_number]
+    if limit_well_number != None:
+        merged = merged[merged['well_number'] == limit_well_number]
+
     return merged
 
 def build_test_dataframe(use_processed_images=True, well_number=None):
