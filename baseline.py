@@ -121,12 +121,15 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr):
     
     print(f'Epoch: {e}')
     print(f'Train loss:      {train_loss / len(train_dataloader)}')
-    print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
     print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
-    print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
-    scheduler.step(valid_iou / len(validation_dataloader))
-  torch.save(model.state_dict(), 'baseline_model_2.pt')
+    if (len(validation_dataloader) > 0):
+      print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
+      print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
+      scheduler.step(valid_iou / len(validation_dataloader))
+    else:
+      scheduler.step(train_iou / len(train_dataloader))
+  torch.save(model.state_dict(), 'baseline_model_3.pt')
 
 if __name__ == '__main__':
-  train_dl, valid_dl = build_dataloaders(build_dataframe())
-  train(train_dl, valid_dl, 100, 0.001)
+  train_dl, valid_dl = build_dataloaders(build_dataframe(use_processed_images=False), apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
+  train(train_dl, valid_dl, 30, 0.001)
