@@ -10,9 +10,9 @@ import unet
 if __name__ == '__main__':
   model = unet.UNet(n_channels=1, n_classes=1, n_steps=4)
   model.load_state_dict(torch.load('./checkpoints/unet/unet_15.pt'))
-  test_df = data_pipeline.build_test_dataframe(use_processed_images=False)
-  train_df = data_pipeline.build_dataframe(use_processed_images=False)
-  X_test, X_names, X_train = data_pipeline.build_test_dataloaders(test_df, train_df, apply_scaling=True)
+  test_df = data_pipeline.build_test_dataframe(use_processed_images=False, limit_well_number=None)
+  train_df = data_pipeline.build_dataframe(use_processed_images=False, limit_well_number=None)
+  X_test, X_names, X_train, Y_train = data_pipeline.build_test_dataloaders(test_df, train_df, apply_scaling=True)
   test_dl = DataLoader(TensorDataset(X_test), batch_size=1)
   with torch.no_grad():
     predictions = {}
