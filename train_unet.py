@@ -61,7 +61,7 @@ class DiceBCELoss(nn.Module):
         return Dice_BCE
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
-  model = unet.UNet(n_channels=1, n_classes=1, n_steps=2).to(DEVICE)
+  model = unet.UNet(n_channels=1, n_classes=1, n_steps=4).to(DEVICE)
   if from_ckpt:
     model.load_state_dict(torch.load(from_ckpt))
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
@@ -104,13 +104,13 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'unet_14.pt')
+  torch.save(model.state_dict(), 'unet_15.pt')
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceBCELoss().to(DEVICE)
   optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
-  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=5)
+  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=5)
 
   train_losses = []
   train_ious = []
@@ -161,4 +161,4 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  train(train_dl, valid_dl, 30, 0.001)
+  train(train_dl, valid_dl, 50, 0.001)
