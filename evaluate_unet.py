@@ -19,7 +19,7 @@ if __name__ == '__main__':
     model.eval()
     for index, x in tqdm(enumerate(test_dl)):
       input = x[0].cuda()
-      out = model()
+      out = model(input)
       preds = (F.sigmoid(out) > .5)*1.
       name = X_names[index][0]
       predictions[name] = preds.cpu().detach().flatten().tolist()
