@@ -14,7 +14,7 @@ if __name__ == '__main__':
   test_df = data_pipeline.build_test_dataframe(use_processed_images=False, limit_well_number=None)
   train_df = data_pipeline.build_dataframe(use_processed_images=False, limit_well_number=None)
 
-  test_data = torch.from_numpy(torch.vstack(test_df['data'].to_numpy()))
+  test_data = torch.from_numpy(torch.vstack(torch.from_numpy(test_df['data'].to_numpy())))
   test_data = torch.nan_to_num(test_data)
   outliers = ((test_data.min(dim=1, keepdim=True).values < -10) == True).flatten()
 
