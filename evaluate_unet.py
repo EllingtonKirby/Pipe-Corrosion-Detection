@@ -7,6 +7,7 @@ from tqdm import tqdm
 import data_pipeline
 import unet
 import numpy as np
+from skimage import morphology
 
 if __name__ == '__main__':
   model = unet.UNet(n_channels=1, n_classes=1, n_steps=4)
@@ -28,9 +29,10 @@ if __name__ == '__main__':
       input = x[0].cuda()
       out = model(input)
       preds = (F.sigmoid(out) > .5)*1.
+      preds = morphology.binary_dilation(preds)
       if outliers[index]:
         preds = torch.zeros_like(out)
       name = X_names[index][0]
       predictions[name] = preds.cpu().detach().flatten().tolist()
   preds_df = pd.DataFrame.from_dict(predictions, orient='index')
-  preds_df.to_csv('KIRBY_predictions_13.csv')
+  preds_df.to_csv('./outputs/KIRBY_predictions_14.csv')
