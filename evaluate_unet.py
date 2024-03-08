@@ -29,10 +29,11 @@ if __name__ == '__main__':
       input = x[0].cuda()
       out = model(input)
       preds = (F.sigmoid(out) > .5)*1.
+      preds = preds.cpu().detach()
       preds = morphology.binary_dilation(preds)
       if outliers[index]:
-        preds = torch.zeros_like(out)
+        preds = torch.zeros_like(out).cpu().detach()
       name = X_names[index][0]
-      predictions[name] = preds.cpu().detach().flatten().tolist()
+      predictions[name] = preds.flatten().tolist()
   preds_df = pd.DataFrame.from_dict(predictions, orient='index')
   preds_df.to_csv('./outputs/KIRBY_predictions_14.csv')
