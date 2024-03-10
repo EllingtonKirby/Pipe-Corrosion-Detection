@@ -3,6 +3,8 @@ from torch.utils.data import DataLoader, Dataset
 import torch.nn.functional as F
 import torchvision
 from torchvision.transforms import v2
+from PIL import Image
+from torchvision import transforms
 import pandas as pd
 import numpy as np
 import os
@@ -114,6 +116,12 @@ def image_label_transforms(image, label, flipper):
     if flip:
         image, label = cutout(image, label, size=6)
 
+    flip = np.random.randint(2) % 2 == 0
+    if flip:
+        angle = np.random.uniform(-15, 15)  # Random rotation angle within [-15, 15] degrees
+        image = rotate_tensor(image, angle)
+        label = rotate_tensor(label, angle)
+
     return image, label
 
 def cutout(image, label, size):
@@ -126,6 +134,14 @@ def cutout(image, label, size):
     label[:, y:y + size, x:x + size] = 0
 
     return image, label
+
+def rotate_tensor(tensor, angle):
+    tensor_pil = transforms.ToPILImage()(tensor)
+
+    tensor_pil = tensor_pil.rotate(angle, resample=Image.BILINEAR)
+
+    tensor_rotated = transforms.ToTensor()(tensor_pil)
+    return tensor_rotated
 
 def just_image_transforms(image, label, flipper):
     axis = 2
