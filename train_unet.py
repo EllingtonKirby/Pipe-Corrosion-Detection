@@ -88,7 +88,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   dice_criterion = DiceBCELoss().to(DEVICE)
-  pseudo_labeling_criterion = nn.BCEWithLogitsLoss()
+  pseudo_labeling_criterion = PseduoLabelBCELoss()
   scheduler = VerboseReduceLROnPlateau(optimizer, 'max', patience=3)
   for e in range(num_epochs):
     train_loss = 0
