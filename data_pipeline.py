@@ -118,9 +118,10 @@ def image_label_transforms(image, label, flipper):
 
     flip = np.random.randint(2) % 2 == 0
     if flip:
-        angle = np.random.uniform(-15, 15)  # Random rotation angle within [-15, 15] degrees
-        image = rotate_tensor(image, angle)
-        label = rotate_tensor(label, angle)
+        axis = 2
+        roll_distance = np.random.randint(0, 4)  # 0, 90, 180, or 270 degrees
+        image = torch.rot90(image, roll_distance, dims=(1, 2))
+        label = torch.rot90(label, roll_distance, dims=(1, 2))
 
     return image, label
 
@@ -134,14 +135,6 @@ def cutout(image, label, size):
     label[:, y:y + size, x:x + size] = 0
 
     return image, label
-
-def rotate_tensor(tensor, angle):
-    tensor_pil = transforms.ToPILImage()(tensor)
-
-    tensor_pil = tensor_pil.rotate(angle, resample=Image.BILINEAR)
-
-    tensor_rotated = transforms.ToTensor()(tensor_pil)
-    return tensor_rotated
 
 def just_image_transforms(image, label, flipper):
     axis = 2
