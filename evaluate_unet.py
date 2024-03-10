@@ -7,7 +7,6 @@ from tqdm import tqdm
 import data_pipeline
 import unet
 import numpy as np
-from skimage import morphology
 
 if __name__ == '__main__':
   model = unet.UNet(n_channels=1, n_classes=1, n_steps=4)
@@ -30,7 +29,6 @@ if __name__ == '__main__':
       out = model(input)
       preds = (F.sigmoid(out) > .5)*1.
       preds = preds.cpu().detach()
-      preds = morphology.binary_dilation(preds)
       if outliers[index]:
         preds = torch.zeros_like(out).cpu().detach()
       name = X_names[index][0]

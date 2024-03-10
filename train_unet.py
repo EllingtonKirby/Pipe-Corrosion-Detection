@@ -59,6 +59,26 @@ class DiceBCELoss(nn.Module):
         Dice_BCE = BCE + dice_loss
         
         return Dice_BCE
+    
+class PseduoLabelBCELoss(nn.Module):
+    def __init__(self):
+          super(PseduoLabelBCELoss, self).__init__()
+
+    def forward(self, pseudo_label, targets):
+       target_label = torch.max(targets) # Value should be 0 or 1
+       return F.binary_cross_entropy_with_logits(pseudo_label, target_label)
+    
+
+class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
+    def __init__(self, *args, **kwargs):
+        super(VerboseReduceLROnPlateau, self).__init__(*args, **kwargs)
+
+    def step(self, metrics, epoch=None):
+        old_lr = self.optimizer.param_groups[0]['lr']
+        super(VerboseReduceLROnPlateau, self).step(metrics, epoch)
+        if old_lr != self.optimizer.param_groups[0]['lr']:
+            print(f"Learning rate reduced from {old_lr} to {self.optimizer.param_groups[0]['lr']}")
+
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
   model = unet.UNet(n_channels=1, n_classes=1, n_steps=4).to(DEVICE)
@@ -66,8 +86,9 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
     model.load_state_dict(torch.load(from_ckpt))
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
-  criterion = DiceBCELoss().to(DEVICE)
-  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'max', patience=3)
+  dice_criterion = DiceBCELoss().to(DEVICE)
+  pseudo_labeling_criterion = nn.BCEWithLogitsLoss()
+  scheduler = VerboseReduceLROnPlateau(optimizer, 'max', patience=3)
   for e in range(num_epochs):
     train_loss = 0
     train_iou = 0
@@ -75,8 +96,10 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       input = input.to(DEVICE)
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
-      preds = model(input)
-      loss = criterion(preds, labels)
+      preds, pseudo_label = model(input)
+      dice_loss = dice_criterion(preds, labels)
+      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      loss = dice_loss + class_loss
       iou = metric(preds, labels)
       train_loss += loss
       train_iou += iou
@@ -90,7 +113,9 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
         preds = model(input)
-        loss = criterion(preds, labels)
+        dice_loss = dice_criterion(preds, labels)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        loss = dice_loss + class_loss
         iou = metric(preds, labels)
         valid_loss += loss
         valid_iou += iou
@@ -104,13 +129,13 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'unet_15.pt')
+  torch.save(model.state_dict(), 'unet_16.pt')
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
   metric = BinaryJaccardIndex().to(DEVICE)
   criterion = DiceBCELoss().to(DEVICE)
   optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
-  scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=5)
+  scheduler = VerboseReduceLROnPlateau(optimizer, 'min', patience=5)
 
   train_losses = []
   train_ious = []

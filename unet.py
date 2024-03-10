@@ -28,6 +28,8 @@ class UNet(nn.Module):
             self.up1 = (Up(1024, 512 // factor, bilinear))
         self.outc = (OutConv(64, n_classes))
 
+        self.out_classifier = nn.Linear(in_features=1024*2, out_features=1)
+
     def forward(self, x):
         x1 = self.inc(x)
         if self.n_steps >= 1:
@@ -53,7 +55,8 @@ class UNet(nn.Module):
             x = self.up4(x, x1)
         
         logits = self.outc(x)
-        return logits
+        pseudo_label = self.out_classifier(x5)
+        return logits, pseudo_label
 
     # def use_checkpointing(self):
     #     self.inc = torch.utils.checkpoint(self.inc)
