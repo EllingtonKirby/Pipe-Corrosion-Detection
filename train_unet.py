@@ -187,4 +187,4 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  train(train_dl, valid_dl, 50, 0.001)
+  train(train_dl, valid_dl, 100, 0.001)
