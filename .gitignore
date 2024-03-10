@@ -165,5 +165,5 @@ example_submission.csv
 inputs/x_train.csv
 predictions
 unet_13.pt
-checkpoints/unet/unet_15.pt
+checkpoints/unet/*
 .DS_Store
