@@ -65,10 +65,11 @@ class PseduoLabelBCELoss(nn.Module):
           super(PseduoLabelBCELoss, self).__init__()
 
     def forward(self, pseudo_label, targets):
-       target_label = torch.max(targets) # Value should be 0 or 1
-       return F.binary_cross_entropy_with_logits(pseudo_label, target_label)
+      tensors = targets.flatten(start_dim=1)
+      contains_ones = (tensors == 1).any(dim=1)
+      labels = contains_ones.int()
+      return F.binary_cross_entropy_with_logits(pseudo_label, labels)
     
-
 class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
     def __init__(self, *args, **kwargs):
         super(VerboseReduceLROnPlateau, self).__init__(*args, **kwargs)

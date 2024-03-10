@@ -28,7 +28,14 @@ class UNet(nn.Module):
             self.up1 = (Up(1024, 512 // factor, bilinear))
         self.outc = (OutConv(64, n_classes))
 
-        self.pseudo_label = nn.LazyLinear(out_features=1)
+        self.pseudo_label = nn.Sequential(
+            nn.MaxPool2d(2), # 1x1
+            nn.Flatten(),
+            nn.Dropout(),
+            nn.Linear(in_features=1024, out_features=1024),
+            nn.BatchNorm1d(num_features=1024),
+            nn.Linear(in_features=1024, out_features=1),
+        )
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -55,7 +62,7 @@ class UNet(nn.Module):
             x = self.up4(x, x1)
         
         logits = self.outc(x)
-        pseudo_label = self.pseudo_label(F.dropout(x5))
+        pseudo_label = self.pseudo_label(x5)
         return logits, pseudo_label
 
     # def use_checkpointing(self):
