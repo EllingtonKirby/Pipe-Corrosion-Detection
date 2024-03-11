@@ -130,7 +130,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'unet_18.pt')
+  torch.save(model.state_dict(), 'unet_19.pt')
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
   metric = BinaryJaccardIndex().to(DEVICE)
