@@ -31,12 +31,12 @@ class up_conv(nn.Module):
         )
 
     def forward(self,x1,x2):
+        x1= self.up(x1)
         diffY = x2.size()[2] - x1.size()[2]
         diffX = x2.size()[3] - x1.size()[3]
         x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
                 diffY // 2, diffY - diffY // 2])
-        x = self.up(x1)
-        return x
+        return x1
     
 class Recurrent_block(nn.Module):
     def __init__(self,ch_out,t=2):
