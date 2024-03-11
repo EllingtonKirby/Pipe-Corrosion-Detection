@@ -30,8 +30,12 @@ class up_conv(nn.Module):
 			nn.ReLU(inplace=True)
         )
 
-    def forward(self,x):
-        x = self.up(x)
+    def forward(self,x1,x2):
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
+        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
+                diffY // 2, diffY - diffY // 2])
+        x = self.up(x1)
         return x
     
 class Recurrent_block(nn.Module):
@@ -166,22 +170,22 @@ class R2AttU_Net(nn.Module):
         x5 = self.RRCNN5(x5)
 
         # decoding + concat path
-        d5 = self.Up5(x5)
+        d5 = self.Up5(x5, x4)
         x4 = self.Att5(g=d5,x=x4)
         d5 = torch.cat((x4,d5),dim=1)
         d5 = self.Up_RRCNN5(d5)
         
-        d4 = self.Up4(d5)
+        d4 = self.Up4(d5,x3)
         x3 = self.Att4(g=d4,x=x3)
         d4 = torch.cat((x3,d4),dim=1)
         d4 = self.Up_RRCNN4(d4)
 
-        d3 = self.Up3(d4)
+        d3 = self.Up3(d4,x2)
         x2 = self.Att3(g=d3,x=x2)
         d3 = torch.cat((x2,d3),dim=1)
         d3 = self.Up_RRCNN3(d3)
 
-        d2 = self.Up2(d3)
+        d2 = self.Up2(d3,x1)
         x1 = self.Att2(g=d2,x=x1)
         d2 = torch.cat((x1,d2),dim=1)
         d2 = self.Up_RRCNN2(d2)
