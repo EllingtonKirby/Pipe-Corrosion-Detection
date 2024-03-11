@@ -88,7 +88,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
   metric = BinaryJaccardIndex().to(DEVICE)
   dice_criterion = DiceBCELoss().to(DEVICE)
-#   pseudo_labeling_criterion = PseduoLabelBCELoss()
+  pseudo_labeling_criterion = PseduoLabelBCELoss()
   scheduler = VerboseReduceLROnPlateau(optimizer, 'max', patience=3)
   for e in range(num_epochs):
     train_loss = 0
@@ -97,10 +97,10 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       input = input.to(DEVICE)
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
-      preds = model(input)
+      preds, pseudo_label = model(input)
       dice_loss = dice_criterion(preds, labels)
-    #   class_loss = pseudo_labeling_criterion(pseudo_label, labels)
-      loss = dice_loss
+      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      loss = dice_loss + class_loss
       iou = metric(preds, labels)
       train_loss += loss
       train_iou += iou
@@ -113,10 +113,10 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       for input, labels in tqdm(iter(validation_dataloader)):
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
-        preds = model(input)
+        preds, pseudo_label = model(input)
         dice_loss = dice_criterion(preds, labels)
-        # class_loss = pseudo_labeling_criterion(pseudo_label, labels)
-        loss = dice_loss
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        loss = dice_loss + class_loss
         iou = metric(preds, labels)
         valid_loss += loss
         valid_iou += iou
@@ -130,7 +130,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'r2u_att_1.pt') 
+  torch.save(model.state_dict(), 'r2u_att_2.pt') 
 
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
