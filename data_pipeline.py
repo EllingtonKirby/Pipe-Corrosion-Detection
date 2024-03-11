@@ -112,9 +112,7 @@ def image_label_transforms(image, label, flipper):
         image = flipper(image)
         label = flipper(label)
 
-    flip = np.random.randint(2) % 2 == 0
-    if flip:
-        image, label = cutout(image, label, size=6)
+    image, label = cutout(image, label, size=6)
 
     return image, label
 
