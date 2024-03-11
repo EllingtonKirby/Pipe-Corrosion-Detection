@@ -82,7 +82,7 @@ class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
 
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
-  model = r2u_att.R2AttU_Net(img_ch=1, output_ch=1)
+  model = r2u_att.R2AttU_Net(img_ch=1, output_ch=1).to(DEVICE)
   if from_ckpt:
     model.load_state_dict(torch.load(from_ckpt))
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
