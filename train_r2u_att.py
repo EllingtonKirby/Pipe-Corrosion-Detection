@@ -132,6 +132,64 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(train_iou / len(train_dataloader))
   torch.save(model.state_dict(), 'r2u_att_2.pt') 
 
+
+def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
+  metric = BinaryJaccardIndex().to(DEVICE)
+  dice_criterion = DiceBCELoss().to(DEVICE)
+  pseudo_labeling_criterion = PseduoLabelBCELoss().to(DEVICE)
+  optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
+  scheduler = VerboseReduceLROnPlateau(optimizer, 'min', patience=5)
+
+  train_losses = []
+  train_ious = []
+  valid_losses = []
+  valid_ious = []
+
+  for e in range(num_epochs):
+    train_loss = 0
+    train_iou = 0
+    for input, labels in tqdm(iter(train_dataloader)):
+      input = input.to(DEVICE)
+      labels = labels.to(DEVICE)
+      optimizer.zero_grad()
+      preds, pseudo_label = model(input)
+      dice_loss = dice_criterion(preds, labels)
+      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      loss = dice_loss + class_loss
+      iou = metric(preds, labels)
+      train_loss += loss
+      train_iou += iou
+      loss.backward()
+      optimizer.step()
+
+    valid_loss = 0
+    valid_iou = 0
+    with torch.no_grad():
+      for input, labels in tqdm(iter(validation_dataloader)):
+        input = input.to(DEVICE)
+        labels = labels.to(DEVICE)
+        preds, pseudo_label = model(input)
+        dice_loss = dice_criterion(preds, labels)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        loss = dice_loss + class_loss
+        iou = metric(preds, labels)
+        valid_loss += loss
+        valid_iou += iou
+    
+    train_losses.append(train_loss.item() / len(train_dataloader))
+    train_ious.append(train_iou.item() / len(train_dataloader))
+    valid_losses.append(valid_loss.item() / len(validation_dataloader))
+    valid_ious.append(valid_iou.item() / len(validation_dataloader))
+
+    print(f'Epoch: {e}')
+    print(f'Train loss:      {train_losses[-1]}')
+    print(f'Validation loss: {valid_losses[-1]}')
+    print(f'Train intersection over union:      {train_ious[-1]}')
+    print(f'Validation intersection over union: {valid_ious[-1]}')
+    scheduler.step(valid_losses[-1])
+    
+  return model, train_losses, train_ious, valid_losses, valid_ious
+
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
