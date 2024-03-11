@@ -116,13 +116,6 @@ def image_label_transforms(image, label, flipper):
     if flip:
         image, label = cutout(image, label, size=6)
 
-    flip = np.random.randint(2) % 2 == 0
-    if flip:
-        axis = 2
-        roll_distance = np.random.randint(0, 4)  # 0, 90, 180, or 270 degrees
-        image = torch.rot90(image, roll_distance, dims=(1, 2))
-        label = torch.rot90(label, roll_distance, dims=(1, 2))
-
     return image, label
 
 def cutout(image, label, size):
