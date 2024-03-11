@@ -114,10 +114,6 @@ def image_label_transforms(image, label, flipper):
 
     image, label = cutout(image, label, size=6)
 
-    transform = transforms.RandomCrop(size=(32, 32))
-    image = transform(image)
-    label = transform(label)
-
     return image, label
 
 def cutout(image, label, size):
