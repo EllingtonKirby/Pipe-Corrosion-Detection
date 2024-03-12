@@ -25,7 +25,7 @@ class DoubleConv(nn.Module):
 class Up(nn.Module):
     """Upscaling then double conv"""
 
-    def __init__(self, in_channels, out_channels, bilinear=True):
+    def __init__(self, in_channels, out_channels, bilinear=False):
         super().__init__()
 
         # if bilinear, use the normal convolutions to reduce the number of channels
@@ -41,14 +41,15 @@ class Up(nn.Module):
         # input is CHW
         diffY = x2.size()[2] - x1.size()[2]
         diffX = x2.size()[3] - x1.size()[3]
-
-        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
-                        diffY // 2, diffY - diffY // 2])
+        
+        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+        
         # if you have padding issues, see
         # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         x = torch.cat([x2, x1], dim=1)
-        return self.conv(x)
+        # in the classic UNet we would apply conv here
+        return x
     
 class Recurrent_block(nn.Module):
     def __init__(self,ch_out,t=2):
@@ -86,9 +87,10 @@ class RRCNN_block(nn.Module):
     
 
 class R2U_Net(nn.Module):
-    def __init__(self,img_ch=3,output_ch=1,t=2):
+    def __init__(self,img_ch=3,output_ch=1,t=2, bilinear=False):
         super(R2U_Net,self).__init__()
         
+        factor = 2 if bilinear else 1
         self.Maxpool = nn.MaxPool2d(kernel_size=2)
 
         self.RRCNN1 = RRCNN_block(ch_in=img_ch,ch_out=64,t=t)
@@ -99,19 +101,18 @@ class R2U_Net(nn.Module):
         
         self.RRCNN4 = RRCNN_block(ch_in=256,ch_out=512,t=t)
         
-        self.RRCNN5 = RRCNN_block(ch_in=512,ch_out=1024,t=t)
+        self.RRCNN5 = RRCNN_block(ch_in=512,ch_out=1024//factor,t=t)
         
-
-        self.Up5 = Up(in_channels=1024,out_channels=512)
+        self.Up5 = Up(in_channels=1024,out_channels=512 //factor,bilinear=bilinear)
         self.Up_RRCNN5 = RRCNN_block(ch_in=1024, ch_out=512,t=t)
         
-        self.Up4 = Up(in_channels=512,out_channels=256)
+        self.Up4 = Up(in_channels=512,out_channels=256//factor, bilinear=bilinear)
         self.Up_RRCNN4 = RRCNN_block(ch_in=512, ch_out=256,t=t)
         
-        self.Up3 = Up(in_channels=256,out_channels=128)
+        self.Up3 = Up(in_channels=256,out_channels=128//factor, bilinear=bilinear)
         self.Up_RRCNN3 = RRCNN_block(ch_in=256, ch_out=128,t=t)
         
-        self.Up2 = Up(in_channels=128,out_channels=64)
+        self.Up2 = Up(in_channels=128,out_channels=64, bilinear=bilinear)
         self.Up_RRCNN2 = RRCNN_block(ch_in=128, ch_out=64,t=t)
 
         self.Conv_1x1 = nn.Conv2d(64,output_ch,kernel_size=1,stride=1,padding=0)
