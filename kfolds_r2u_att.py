@@ -12,9 +12,9 @@ def main():
   X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   X = torch.nan_to_num(X)
   Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
-  splits = KFold(n_splits=3)
+  splits = KFold(n_splits=5)
 
-  models = [1, 2, 3, 4] # Number of Recurrence steps
+  models = [2] # Number of Recurrence steps
 
   per_model_losses = {}
   per_model_metrics = {}
@@ -22,7 +22,7 @@ def main():
     model_losses = []
     model_metrics = []
     for fold, (train_indices, valid_indices) in enumerate(splits.split(X=X, y=Y)):
-      model = r2u_att.R2AttU_Net(img_ch=1, output_ch=1, t=t_steps).to(torch.device('cuda:0'))
+      model = r2u_att.R2U_Net(img_ch=1, output_ch=1, t=t_steps, bilinear=False).to(torch.device('cuda:0'))
       print("-"*100)
       print(f"R2U_Att Net with {t_steps} recurrences, Fold: {fold}")
       X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)
@@ -54,7 +54,7 @@ def main():
   print("-"*100)
   print("Finished full KFolds testing")
   for key in per_model_losses.keys():
-    print(f"R2U_Att(recurrences={key}): loss={per_model_losses[key]}, IoU={per_model_metrics[key]}")
+    print(f"R2U(recurrences={key}): loss={per_model_losses[key]}, IoU={per_model_metrics[key]}")
 
 if __name__=='__main__':
   main()
