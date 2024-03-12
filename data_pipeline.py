@@ -124,8 +124,8 @@ def cutout(image: torch.Tensor, label: torch.Tensor, size):
     y = np.random.randint(0, h - size - 1)
     x = np.random.randint(0, w - size - 1)
 
-    image_c[:,:, y:y + size, x:x + size] = 0
-    label_c[:,:, y:y + size, x:x + size] = 0
+    image_c[:, y:y + size, x:x + size] = 0
+    label_c[:, y:y + size, x:x + size] = 0
 
     return image_c, label_c
 
