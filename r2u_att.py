@@ -102,16 +102,16 @@ class R2U_Net(nn.Module):
         self.RRCNN5 = RRCNN_block(ch_in=512,ch_out=1024,t=t)
         
 
-        self.Up5 = Up(ch_in=1024,ch_out=512)
+        self.Up5 = Up(in_channels=1024,out_channels=512)
         self.Up_RRCNN5 = RRCNN_block(ch_in=1024, ch_out=512,t=t)
         
-        self.Up4 = Up(ch_in=512,ch_out=256)
+        self.Up4 = Up(in_channels=512,out_channels=256)
         self.Up_RRCNN4 = RRCNN_block(ch_in=512, ch_out=256,t=t)
         
-        self.Up3 = Up(ch_in=256,ch_out=128)
+        self.Up3 = Up(in_channels=256,out_channels=128)
         self.Up_RRCNN3 = RRCNN_block(ch_in=256, ch_out=128,t=t)
         
-        self.Up2 = Up(ch_in=128,ch_out=64)
+        self.Up2 = Up(in_channels=128,out_channels=64)
         self.Up_RRCNN2 = RRCNN_block(ch_in=128, ch_out=64,t=t)
 
         self.Conv_1x1 = nn.Conv2d(64,output_ch,kernel_size=1,stride=1,padding=0)
