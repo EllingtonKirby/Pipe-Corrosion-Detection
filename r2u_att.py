@@ -234,17 +234,17 @@ class R2U_Net(nn.Module):
         d5 = self.Up_RRCNN5(d5)
         
         d4 = self.Up4(d5)
-        d5 = pad_to_match(d4, x3)
+        d4 = pad_to_match(d4, x3)
         d4 = torch.cat((x3,d4),dim=1)
         d4 = self.Up_RRCNN4(d4)
 
         d3 = self.Up3(d4)
-        d5 = pad_to_match(d3, x2)
+        d3 = pad_to_match(d3, x2)
         d3 = torch.cat((x2,d3),dim=1)
         d3 = self.Up_RRCNN3(d3)
 
         d2 = self.Up2(d3)
-        d5 = pad_to_match(d2, x1)
+        d2 = pad_to_match(d2, x1)
         d2 = torch.cat((x1,d2),dim=1)
         d2 = self.Up_RRCNN2(d2)
 
