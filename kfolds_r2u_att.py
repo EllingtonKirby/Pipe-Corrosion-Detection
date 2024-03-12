@@ -13,7 +13,7 @@ def main():
   X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   X = torch.nan_to_num(X)
   Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
-  splits = KFold(n_splits=5)
+  splits = KFold(n_splits=5, shuffle=True)
 
   models = [2] # Number of Recurrence steps
 
@@ -42,7 +42,7 @@ def main():
       valid_dataloader = DataLoader(valid_dataset, batch_size=128)
       
       # Train
-      _, _, _, valid_losses, valid_metrics = train_r2u_att.train_local(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=100)
+      _, _, _, valid_losses, valid_metrics = train_r2u_att.train_local(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=50)
       model_losses.append(valid_losses[-1])
       model_metrics.append(valid_metrics[-1])
 
