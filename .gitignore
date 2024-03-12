@@ -167,4 +167,5 @@ predictions
 unet_13.pt
 checkpoints/unet/*
 checkpoints/r2uatt/*
+checkpoints/r2u/*
 .DS_Store

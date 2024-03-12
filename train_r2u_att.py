@@ -82,7 +82,7 @@ class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
 
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
-  model = r2u_att.R2AttU_Net(img_ch=1, output_ch=1).to(DEVICE)
+  model = r2u_att.R2U_Net(img_ch=1, output_ch=1).to(DEVICE)
   if from_ckpt:
     model.load_state_dict(torch.load(from_ckpt))
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
@@ -130,7 +130,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'r2u_att_3.pt') 
+  torch.save(model.state_dict(), 'r2u_1.pt') 
 
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
@@ -193,5 +193,5 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  from_ckpt = './r2u_att_2.pt'
+  from_ckpt = None
   train(train_dl, valid_dl, 100, 0.001, from_ckpt)
