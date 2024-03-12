@@ -154,7 +154,10 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
       optimizer.zero_grad()
       preds, pseudo_label = model(input)
       dice_loss = dice_criterion(preds, labels)
-      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      if pseudo_label != None:
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      else:
+         class_loss = 0
       loss = dice_loss + class_loss
       iou = metric(preds, labels)
       train_loss += loss
@@ -170,7 +173,10 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
         labels = labels.to(DEVICE)
         preds, pseudo_label = model(input)
         dice_loss = dice_criterion(preds, labels)
-        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        if pseudo_label != None:
+          class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        else:
+          class_loss = 0
         loss = dice_loss + class_loss
         iou = metric(preds, labels)
         valid_loss += loss

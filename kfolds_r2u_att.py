@@ -23,9 +23,9 @@ def main():
     model_losses = []
     model_metrics = []
     for fold, (train_indices, valid_indices) in enumerate(splits.split(X=X, y=Y)):
-      model = r2u_att.R2U_Net(img_ch=1, output_ch=1).to(torch.device('cuda:0'))
+      model = attunet.AttU_Net(img_ch=1, output_ch=1).to(torch.device('cuda:0'))
       print("-"*100)
-      print(f"R2U Net Fold: {fold}")
+      print(f"AttU Net Fold: {fold}")
       X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)
       Y_train, Y_valid = Y[train_indices].float(), Y[valid_indices].float()
 
@@ -55,7 +55,7 @@ def main():
   print("-"*100)
   print("Finished full KFolds testing")
   for key in per_model_losses.keys():
-    print(f"R2U(): loss={per_model_losses[key]}, IoU={per_model_metrics[key]}")
+    print(f"AttU(): loss={per_model_losses[key]}, IoU={per_model_metrics[key]}")
 
 if __name__=='__main__':
   main()
