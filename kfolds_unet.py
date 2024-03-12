@@ -12,7 +12,7 @@ def main():
   X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   X = torch.nan_to_num(X)
   Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
-  splits = KFold(n_splits=5)
+  splits = KFold(n_splits=5, shuffle=True)
 
   models = [4] # Number of UNet steps
 
