@@ -116,9 +116,9 @@ def image_label_transforms(image, label, flipper):
 
     return image, label
 
-def cutout(image, label, size):
-    image_c = image.copy()
-    label_c = label.copy()
+def cutout(image: torch.Tensor, label: torch.Tensor, size):
+    image_c = image.clone()
+    label_c = label.clone()
     h, w = image.shape[-2:]
 
     y = np.random.randint(0, h - size - 1)
