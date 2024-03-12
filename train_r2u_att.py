@@ -89,7 +89,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
   metric = BinaryJaccardIndex().to(DEVICE)
   dice_criterion = DiceBCELoss().to(DEVICE)
   pseudo_labeling_criterion = PseduoLabelBCELoss()
-  scheduler = VerboseReduceLROnPlateau(optimizer, 'max', patience=3)
+  scheduler = VerboseReduceLROnPlateau(optimizer, 'max', patience=5)
   for e in range(num_epochs):
     train_loss = 0
     train_iou = 0
@@ -130,7 +130,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'r2u_att_2.pt') 
+  torch.save(model.state_dict(), 'r2u_att_3.pt') 
 
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
@@ -193,4 +193,5 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  train(train_dl, valid_dl, 200, 0.001)
+  from_ckpt = './r2u_att_2.pt'
+  train(train_dl, valid_dl, 100, 0.001, from_ckpt)

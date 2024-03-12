@@ -166,4 +166,5 @@ inputs/x_train.csv
 predictions
 unet_13.pt
 checkpoints/unet/*
+checkpoints/r2uatt/*
 .DS_Store
