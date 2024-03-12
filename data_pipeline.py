@@ -112,18 +112,22 @@ def image_label_transforms(image, label, flipper):
         image = flipper(image)
         label = flipper(label)
 
+    image, label = cutout(image, label, size=6)
+
     return image, label
 
 def cutout(image, label, size):
+    image_c = image.copy()
+    label_c = label.copy()
     h, w = image.shape[-2:]
 
     y = np.random.randint(0, h - size - 1)
     x = np.random.randint(0, w - size - 1)
 
-    image[:, y:y + size, x:x + size] = 0
-    label[:, y:y + size, x:x + size] = 0
+    image_c[:,:, y:y + size, x:x + size] = 0
+    label_c[:,:, y:y + size, x:x + size] = 0
 
-    return image, label
+    return image_c, label_c
 
 def just_image_transforms(image, label, flipper):
     axis = 2
