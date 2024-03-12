@@ -210,6 +210,15 @@ class R2U_Net(nn.Module):
 
         self.Conv_1x1 = nn.Conv2d(64,output_ch,kernel_size=1,stride=1,padding=0)
 
+        self.pseudo_label = nn.Sequential(
+            nn.MaxPool2d(2), # 1x1
+            nn.Flatten(),
+            nn.Dropout(),
+            nn.Linear(in_features=1024, out_features=1024),
+            nn.BatchNorm1d(num_features=1024),
+            nn.Linear(in_features=1024, out_features=1),
+        )
+
 
     def forward(self,x):
         # encoding path
@@ -250,4 +259,6 @@ class R2U_Net(nn.Module):
 
         d1 = self.Conv_1x1(d2)
 
-        return d1
+        pseudo_label = self.pseudo_label(x5)
+
+        return d1, pseudo_label
