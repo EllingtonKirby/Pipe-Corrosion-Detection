@@ -45,6 +45,11 @@ def build_dataframe(use_processed_images=True, limit_well_number=None):
     merged['labels'] = labeled_data.tolist()
     merged = merged.rename(columns={'Unnamed: 0':'label_name'})
     merged = merged.fillna(0.0)
+    
+    data = torch.from_numpy(np.vstack(merged['data'].to_numpy(dtype=np.ndarray)))
+    # Remove corruputed samples
+    outliers = ((data.min(dim=1, keepdim=True).values < -10) == True).flatten()
+    merged = merged.drop(merged.loc[outliers.tolist()].index)
 
     if limit_well_number != None:
         merged = merged[merged['well_number'] == limit_well_number]
@@ -136,14 +141,6 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
 
-    # Remove samples with more than 10% corruption, replace other corruption with 0
-    count_less_than_neg_10 = torch.sum(data < -10, dim=1)
-    total_elements_per_row = data.size(1)
-    ratios = count_less_than_neg_10.float() / total_elements_per_row
-    data = data[ratios < .1]
-    data[data < -10] = 0
-    labels = labels[ratios < .1]
-
     if split_train:
         p = np.random.permutation(len(data))
         data, labels = data[p], labels[p]
@@ -194,12 +191,6 @@ def build_test_dataloaders(test_dataframe, train_dataframe, apply_scaling=False)
     test_data = torch.from_numpy(np.vstack(test_dataframe['data'].to_numpy()))
     test_data = torch.nan_to_num(test_data)
     X_names = np.vstack(test_dataframe['filename'].to_numpy())
-
-    count_less_than_neg_10 = torch.sum(test_data < -10, dim=1)
-    total_elements_per_row = test_data.size(1)
-    ratios = count_less_than_neg_10.float() / total_elements_per_row
-    test_data = test_data[ratios < .1]
-    test_data[test_data < -10] = 0
 
     train_data = torch.from_numpy(np.vstack(train_dataframe['data'].to_numpy()))
     train_data = torch.nan_to_num(train_data)
