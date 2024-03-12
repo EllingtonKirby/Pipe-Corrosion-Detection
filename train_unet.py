@@ -134,7 +134,8 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
   metric = BinaryJaccardIndex().to(DEVICE)
-  criterion = DiceBCELoss().to(DEVICE)
+  dice_criterion = DiceBCELoss().to(DEVICE)
+  pseudo_labeling_criterion = PseduoLabelBCELoss()
   optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
   scheduler = VerboseReduceLROnPlateau(optimizer, 'min', patience=5)
 
@@ -150,8 +151,10 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
       input = input.to(DEVICE)
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
-      preds = model(input)
-      loss = criterion(preds, labels)
+      preds, pseudo_label = model(input)
+      dice_loss = dice_criterion(preds, labels)
+      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      loss = dice_loss + class_loss
       iou = metric(preds, labels)
       train_loss += loss
       train_iou += iou
@@ -164,8 +167,10 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
       for input, labels in tqdm(iter(validation_dataloader)):
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
-        preds = model(input)
-        loss = criterion(preds, labels)
+        preds, pseudo_label = model(input)
+        dice_loss = dice_criterion(preds, labels)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        loss = dice_loss + class_loss
         iou = metric(preds, labels)
         valid_loss += loss
         valid_iou += iou

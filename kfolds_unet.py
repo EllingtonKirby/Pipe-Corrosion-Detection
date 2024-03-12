@@ -14,7 +14,7 @@ def main():
   Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
   splits = KFold(n_splits=5)
 
-  models = [1, 2, 3, 4] # Number of UNet steps
+  models = [4] # Number of UNet steps
 
   per_model_losses = {}
   per_model_metrics = {}
