@@ -41,10 +41,13 @@ class DiceLoss(nn.Module):
     return 1 - dice
 
 class DiceBCELoss(nn.Module):
-    def __init__(self, weight=None, size_average=True):
+    def __init__(self):
         super(DiceBCELoss, self).__init__()
 
-    def forward(self, inputs, targets, smooth=1):
+    def forward(self, inputs, targets, weights, smooth=1):
+        
+        if weights == None:
+           weights = torch.ones(targets.shape[0])
         
         #comment out if your model contains a sigmoid or equivalent activation layer
         inputs = F.sigmoid(inputs)       
@@ -58,27 +61,19 @@ class DiceBCELoss(nn.Module):
         BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
         Dice_BCE = BCE + dice_loss
         
-        return Dice_BCE
+        return Dice_BCE * weights
     
 class PseduoLabelBCELoss(nn.Module):
     def __init__(self):
           super(PseduoLabelBCELoss, self).__init__()
 
-    def forward(self, pseudo_label, targets):
+    def forward(self, pseudo_label, targets, weights):
+      if weights == None:
+           weights = torch.ones(targets.shape[0])
       tensors = targets.flatten(start_dim=1)
       contains_ones = (tensors == 1).any(dim=1)
       labels = contains_ones.int()
-      return F.binary_cross_entropy_with_logits(pseudo_label, labels.reshape(-1,1).float())
-    
-# class WellIDLoss(nn.Module):
-#     def __init__(self, num_wells):
-#       super(WellIDLoss, self).__init__()
-#       self.num_wells = num_wells
-
-#     def forward(self, pos_out, pos_target, neg_out, neg_target, ):
-#       pos_loss = F.cross_entropy(pos_out, F.one_hot(pos_target, self.num_wells))
-#       neg_loss = F.cross_entropy(neg_out, F.one_hot(neg_target, self.num_wells))
-#       return pos_loss - neg_loss
+      return F.binary_cross_entropy_with_logits(pseudo_label, labels.reshape(-1,1).float()) * weights
     
 class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
     def __init__(self, *args, **kwargs):
@@ -199,63 +194,63 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
     
   return model, train_losses, train_ious, valid_losses, valid_ious 
 
-# def train_ensemble(well_model_mapping, well_group_mapping, train_dataloader, validation_dataloader, lr, num_epochs, num_wells):
-#   metric = BinaryJaccardIndex().to(DEVICE)
-#   dice_criterion = DiceBCELoss().to(DEVICE)
-#   pseudo_labeling_criterion = PseduoLabelBCELoss()
-#   well_id_criterion = WellIDLoss(num_wells=num_wells)
-#   optimizers = {torch.optim.Adam(params=model.parameters(), lr=lr)}
-#   scheduler = VerboseReduceLROnPlateau(optimizer, 'min', patience=5)
+def train_local_weighted(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
+  metric = BinaryJaccardIndex().to(DEVICE)
+  dice_criterion = DiceBCELoss().to(DEVICE)
+  pseudo_labeling_criterion = PseduoLabelBCELoss()
+  optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
+  scheduler = VerboseReduceLROnPlateau(optimizer, 'min', patience=5)
 
-#   train_losses = []
-#   train_ious = []
-#   valid_losses = []
-#   valid_ious = []
+  train_losses = []
+  train_ious = []
+  valid_losses = []
+  valid_ious = []
 
-#   for e in range(num_epochs):
-#     train_loss = 0
-#     train_iou = 0
-#     for input, labels, wells in tqdm(iter(train_dataloader)):
-#       input = input.to(DEVICE)
-#       labels = labels.to(DEVICE)
-#       optimizer.zero_grad()
-#       preds, pseudo_label = model(input)
-#       dice_loss = dice_criterion(preds, labels)
-#       class_loss = pseudo_labeling_criterion(pseudo_label, labels)
-#       loss = dice_loss + class_loss
-#       iou = metric(preds, labels)
-#       train_loss += loss
-#       train_iou += iou
-#       loss.backward()
-#       optimizer.step()
+  for e in range(num_epochs):
+    train_loss = 0
+    train_iou = 0
+    for input, labels, weights in tqdm(iter(train_dataloader)):
+      input = input.to(DEVICE)
+      labels = labels.to(DEVICE)
+      optimizer.zero_grad()
+      preds, pseudo_label = model(input)
+      dice_loss = dice_criterion(preds, labels, weights)
+      class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights)
+      loss = dice_loss + class_loss
+      iou = metric(preds, labels)
+      train_loss += loss
+      train_iou += iou
+      loss.backward()
+      optimizer.step()
 
-#     valid_loss = 0
-#     valid_iou = 0
-#     with torch.no_grad():
-#       for input, labels in tqdm(iter(validation_dataloader)):
-#         input = input.to(DEVICE)
-#         labels = labels.to(DEVICE)
-#         preds, pseudo_label = model(input)
-#         dice_loss = dice_criterion(preds, labels)
-#         class_loss = pseudo_labeling_criterion(pseudo_label, labels)
-#         loss = dice_loss + class_loss
-#         iou = metric(preds, labels)
-#         valid_loss += loss
-#         valid_iou += iou
+    valid_loss = 0
+    valid_iou = 0
+    with torch.no_grad():
+      for input, labels, weights in tqdm(iter(validation_dataloader)):
+        input = input.to(DEVICE)
+        labels = labels.to(DEVICE)
+        preds, pseudo_label = model(input)
+        dice_loss = dice_criterion(preds, labels, weights)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights)
+        loss = dice_loss + class_loss
+        iou = metric(preds, labels)
+        valid_loss += loss
+        valid_iou += iou
     
-#     train_losses.append(train_loss.item() / len(train_dataloader))
-#     train_ious.append(train_iou.item() / len(train_dataloader))
-#     valid_losses.append(valid_loss.item() / len(validation_dataloader))
-#     valid_ious.append(valid_iou.item() / len(validation_dataloader))
+    train_losses.append(train_loss.item() / len(train_dataloader))
+    train_ious.append(train_iou.item() / len(train_dataloader))
+    valid_losses.append(valid_loss.item() / len(validation_dataloader))
+    valid_ious.append(valid_iou.item() / len(validation_dataloader))
 
-#     print(f'Epoch: {e}')
-#     print(f'Train loss:      {train_losses[-1]}')
-#     print(f'Validation loss: {valid_losses[-1]}')
-#     print(f'Train intersection over union:      {train_ious[-1]}')
-#     print(f'Validation intersection over union: {valid_ious[-1]}')
-#     scheduler.step(valid_losses[-1])
+    print(f'Epoch: {e}')
+    print(f'Train loss:      {train_losses[-1]}')
+    print(f'Validation loss: {valid_losses[-1]}')
+    print(f'Train intersection over union:      {train_ious[-1]}')
+    print(f'Validation intersection over union: {valid_ious[-1]}')
+    scheduler.step(valid_losses[-1])
     
-#   return model, train_losses, train_ious, valid_losses, valid_ious 
+  return model, train_losses, train_ious, valid_losses, valid_ious
+
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)

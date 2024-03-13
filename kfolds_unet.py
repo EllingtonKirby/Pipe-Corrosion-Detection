@@ -6,12 +6,23 @@ import unet
 import data_pipeline
 from sklearn.model_selection import KFold
 from sklearn.preprocessing import RobustScaler
+import collections
 
 def main():
   dataframe = data_pipeline.build_dataframe(use_processed_images=False)
   X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
   X = torch.nan_to_num(X)
   Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
+  
+  well_numbers = dataframe['well_number']
+  wells = torch.from_numpy(np.vstack(well_numbers.to_numpy())) - 1
+  well_mean_weight = np.mean(dataframe['well_number'].value_counts().values)
+  sample_weight = {well: ratio/well_mean_weight for well, ratio in dataframe['well_number'].value_counts().items()}
+  sample_weight = {well: 1/ratio for well, ratio in sample_weight.items()}
+  sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
+  sample_weight = torch.tensor(list(sample_weight.values()))
+  wells = sample_weight[wells]
+
   splits = KFold(n_splits=5, shuffle=True)
 
   models = [4] # Number of UNet steps
@@ -27,6 +38,7 @@ def main():
       print(f"Unet with Steps: {model.n_steps}, Fold: {fold}")
       X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)
       Y_train, Y_valid = Y[train_indices].float(), Y[valid_indices].float()
+      Wells_train, Wells_valid = wells[train_indices].float(), wells[valid_indices].float()
 
       # Scale
       scaler = RobustScaler().fit(X_train)
@@ -34,14 +46,14 @@ def main():
       X_train, X_valid = X_train.float().reshape(-1, 1, 36, 36), X_valid.float().reshape(-1, 1, 36, 36)
       Y_train, Y_valid = Y_train.reshape(-1, 1, 36, 36), Y_valid.reshape(-1, 1, 36, 36)
 
-      train_dataset = data_pipeline.WellsDataset(X_train, Y_train, transform=data_pipeline.image_label_transforms)
-      valid_dataset = data_pipeline.WellsDataset(X_valid, Y_valid, transform=None)
+      train_dataset = data_pipeline.WellsDataset(X_train, Y_train, Wells_train, transform=data_pipeline.image_label_transforms)
+      valid_dataset = data_pipeline.WellsDataset(X_valid, Y_valid, Wells_valid, transform=None)
 
       train_dataloader = DataLoader(train_dataset, batch_size=128)
       valid_dataloader = DataLoader(valid_dataset, batch_size=128)
       
       # Train
-      _, _, _, valid_losses, valid_metrics = train_unet.train_local(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=50)
+      _, _, _, valid_losses, valid_metrics = train_unet.train_local_weighted(model, train_dataloader, valid_dataloader, lr=.001, num_epochs=50)
       model_losses.append(valid_losses[-1])
       model_metrics.append(valid_metrics[-1])
 
