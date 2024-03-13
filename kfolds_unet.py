@@ -21,7 +21,7 @@ def main():
   sample_weight = {well: 1/ratio for well, ratio in sample_weight.items()}
   sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
   sample_weight = torch.tensor(list(sample_weight.values()))
-  wells = sample_weight[wells]
+  wells = sample_weight[wells].reshape(-1,1)
 
   splits = KFold(n_splits=5, shuffle=True)
 
