@@ -217,7 +217,7 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
       preds, pseudo_label = model(input)
       dice_loss = dice_criterion(preds, labels, weights)
       if pseudo_label != None:
-        class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
       else: 
         class_loss = 0
       loss = dice_loss + class_loss
