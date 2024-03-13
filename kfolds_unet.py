@@ -33,7 +33,7 @@ def main():
     model_losses = []
     model_metrics = []
     for fold, (train_indices, valid_indices) in enumerate(splits.split(X=X, y=Y)):
-      model = unet.UNet(n_channels=1, n_classes=1, n_steps=steps).to(torch.device('cuda:0'))
+      model = unet.UNet(n_channels=1, n_classes=1, n_steps=steps, with_pl=False).to(torch.device('cuda:0'))
       print("-"*100)
       print(f"Unet with Steps: {model.n_steps}, Fold: {fold}")
       X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)

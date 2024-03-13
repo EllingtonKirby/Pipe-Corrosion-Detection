@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes, n_steps=2, bilinear=False,):
+    def __init__(self, n_channels, n_classes, n_steps=2, bilinear=False,with_pl=True):
         super(UNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
@@ -14,20 +14,16 @@ class UNet(nn.Module):
 
         self.inc = (DoubleConv(n_channels, 64))
         factor = 2 if bilinear else 1
-        if n_steps >= 1:
-            self.down1 = (Down(64, 128))
-            self.up4 = (Up(128, 64, bilinear))
-        if n_steps >= 2:
-            self.down2 = (Down(128, 256))
-            self.up3 = (Up(256, 128 // factor, bilinear))
-        if n_steps >= 3:
-            self.down3 = (Down(256, 512))
-            self.up2 = (Up(512, 256 // factor, bilinear))
-        if n_steps >= 4:
-            self.down4 = (Down(512, 1024 // factor))
-            self.up1 = (Up(1024, 512 // factor, bilinear))
+        self.down1 = (Down(64, 128))
+        self.up4 = (Up(128, 64, bilinear))
+        self.down2 = (Down(128, 256))
+        self.up3 = (Up(256, 128 // factor, bilinear))
+        self.down3 = (Down(256, 512))
+        self.up2 = (Up(512, 256 // factor, bilinear))
+        self.down4 = (Down(512, 1024 // factor))
+        self.up1 = (Up(1024, 512 // factor, bilinear))
         self.outc = (OutConv(64, n_classes))
-
+        self.with_pl = with_pl
         self.pseudo_label = nn.Sequential(
             nn.MaxPool2d(2), # 1x1
             nn.Flatten(),
@@ -39,43 +35,27 @@ class UNet(nn.Module):
 
     def forward(self, x):
         x1 = self.inc(x)
-        if self.n_steps >= 1:
-            x2 = self.down1(x1)
-            x = x2
-        if self.n_steps >= 2:
-            x3 = self.down2(x2)
-            x = x3
-        if self.n_steps >= 3:
-            x4 = self.down3(x3)
-            x = x4
-        if self.n_steps >=4 :
-            x5 = self.down4(x4)
-            x = x5
+        x2 = self.down1(x1)
+        x = x2
+        x3 = self.down2(x2)
+        x = x3
+        x4 = self.down3(x3)
+        x = x4
+        x5 = self.down4(x4)
+        x = x5
 
-        if self.n_steps >= 4:
-            x = self.up1(x, x4)
-        if self.n_steps >= 3:
-            x = self.up2(x, x3)
-        if self.n_steps >= 2:
-            x = self.up3(x, x2)
-        if self.n_steps >= 1:
-            x = self.up4(x, x1)
-        
+        x = self.up1(x, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
+    
         logits = self.outc(x)
-        pseudo_label = self.pseudo_label(x5)
-        return logits, pseudo_label
+        if self.with_pl:
+            pseudo_label = self.pseudo_label(x5)
+        else:
+            pseudo_label = None
 
-    # def use_checkpointing(self):
-    #     self.inc = torch.utils.checkpoint(self.inc)
-    #     self.down1 = torch.utils.checkpoint(self.down1)
-    #     self.down2 = torch.utils.checkpoint(self.down2)
-    #     self.down3 = torch.utils.checkpoint(self.down3)
-    #     self.down4 = torch.utils.checkpoint(self.down4)
-    #     self.up1 = torch.utils.checkpoint(self.up1)
-    #     self.up2 = torch.utils.checkpoint(self.up2)
-    #     self.up3 = torch.utils.checkpoint(self.up3)
-    #     self.up4 = torch.utils.checkpoint(self.up4)
-    #     self.outc = torch.utils.checkpoint(self.outc)
+        return logits, pseudo_label
 
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
