@@ -11,6 +11,7 @@ import os
 import re
 from sklearn.preprocessing import RobustScaler
 import json
+import collections
 torchvision.disable_beta_transforms_warning()
     
 def build_dataframe(use_processed_images=True, limit_well_number=None):
@@ -212,6 +213,41 @@ def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentati
     else:
         train_dataset = WellsDataset(X_train, Y_train, image_label_transforms)
         valid_dataset = WellsDataset(X_valid, Y_valid, None)
+
+    train_dataloader = DataLoader(train_dataset, batch_size=128)
+    valid_dataloader = DataLoader(valid_dataset, batch_size=128)
+
+    return train_dataloader, valid_dataloader
+
+def build_dataloaders_weighted(tau):
+    dataframe = build_dataframe(use_processed_images=False)
+    X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
+    X = torch.nan_to_num(X)
+    Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()
+                                   ))
+    well_numbers = dataframe['well_number']
+    wells = torch.from_numpy(np.vstack(well_numbers.to_numpy())) - 1
+    well_mean_weight = np.mean(np.log(dataframe['well_number'].value_counts().values))
+    
+    sample_weight = {well: np.exp(well_mean_weight - ratio) for well, ratio in dataframe['well_number'].value_counts().items()}
+    sample_weight = {well: min(1/ratio, tau) for well, ratio in sample_weight.items()}
+    
+    sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
+    sample_weight = torch.tensor(list(sample_weight.values()))
+    wells = sample_weight[wells].flatten()
+
+    X_train, X_valid = X.float().reshape(-1, 1, 36, 36), torch.zeros(0)
+    Y_train, Y_valid = Y.float().reshape(-1, 1, 36, 36), torch.zeros(0)
+    Wells_train, Wells_valid = wells.float().reshape(-1, 1, 1, 1), torch.zeros(0).reshape(-1, 1, 1, 1)
+
+    # Scale
+    scaler = RobustScaler().fit(X_train)
+    X_train, X_valid = torch.from_numpy(scaler.transform(X_train)), torch.from_numpy(scaler.transform(X_valid))
+    X_train, X_valid = X_train.float().reshape(-1, 1, 36, 36), X_valid.float().reshape(-1, 1, 36, 36)
+    Y_train, Y_valid = Y_train.reshape(-1, 1, 36, 36), Y_valid.reshape(-1, 1, 36, 36)
+
+    train_dataset = WellsDataset(X_train, Y_train, transform=image_label_transforms,  wells=Wells_train)
+    valid_dataset = WellsDataset(X_valid, Y_valid, transform=None, wells=Wells_valid)
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)

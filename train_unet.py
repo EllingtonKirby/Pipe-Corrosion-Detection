@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import unet
 from torchmetrics.classification import BinaryJaccardIndex
 from tqdm import tqdm
-from data_pipeline import build_dataframe, build_dataloaders
+from data_pipeline import build_dataframe, build_dataloaders, build_dataloaders_weighted
 
 global DEVICE
 DEVICE = torch.device('cpu')
@@ -137,6 +137,65 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(train_iou / len(train_dataloader))
   torch.save(model.state_dict(), 'unet_20.pt')
 
+def train_weighted(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
+  model = unet.UNet(n_channels=1, n_classes=1, n_steps=4, with_pl=True).to(DEVICE)
+  if from_ckpt:
+    model.load_state_dict(torch.load(from_ckpt))
+  optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
+  metric = BinaryJaccardIndex().to(DEVICE)
+  dice_criterion = DiceBCELoss().to(DEVICE)
+  pseudo_labeling_criterion = PseduoLabelBCELoss()
+  scheduler = VerboseReduceLROnPlateau(optimizer, 'max', patience=5)
+  for e in range(num_epochs):
+    train_loss = 0
+    train_iou = 0
+    for input, labels, weights in tqdm(iter(train_dataloader)):
+      input = input.to(DEVICE)
+      labels = labels.to(DEVICE)
+      weights = weights.to(DEVICE)
+      optimizer.zero_grad()
+      preds, pseudo_label = model(input)
+      dice_loss = dice_criterion(preds, labels, weights)
+      if pseudo_label != None:
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
+      else: 
+        class_loss = 0
+      loss = dice_loss + class_loss
+      iou = metric(preds, labels)
+      train_loss += loss
+      train_iou += iou
+      loss.backward()
+      optimizer.step()
+
+    valid_loss = 0
+    valid_iou = 0
+    with torch.no_grad():
+      for input, labels, weights in tqdm(iter(validation_dataloader)):
+        input = input.to(DEVICE)
+        labels = labels.to(DEVICE)
+        weights = weights.to(DEVICE)
+        preds, pseudo_label = model(input)
+        dice_loss = dice_criterion(preds, labels, weights)
+        if pseudo_label != None:
+          class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
+        else: 
+          class_loss = 0
+        loss = dice_loss + class_loss
+        iou = metric(preds, labels)
+        valid_loss += loss
+        valid_iou += iou
+    
+    print(f'Epoch: {e}')
+    print(f'Train loss:      {train_loss / len(train_dataloader)}')
+    print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
+    if (len(validation_dataloader) > 0):
+      print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
+      print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
+      scheduler.step(valid_iou / len(validation_dataloader))
+    else:
+      scheduler.step(train_iou / len(train_dataloader))
+  torch.save(model.state_dict(), 'unet_21.pt')
+
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
   metric = BinaryJaccardIndex().to(DEVICE)
   dice_criterion = DiceBCELoss().to(DEVICE)
@@ -260,6 +319,6 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
   return model, train_losses, train_ious, valid_losses, valid_ious
 
 if __name__ == '__main__':
-  df = build_dataframe(use_processed_images=False, limit_well_number=None)
-  train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  train(train_dl, valid_dl, 100, 0.001)
+  tau = 5
+  train_dl, valid_dl = build_dataloaders_weighted(tau=tau)
+  train_weighted(train_dl, valid_dl, 100, 0.001)
