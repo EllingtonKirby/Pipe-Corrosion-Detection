@@ -16,9 +16,11 @@ def main():
   
   well_numbers = dataframe['well_number']
   wells = torch.from_numpy(np.vstack(well_numbers.to_numpy())) - 1
-  well_mean_weight = np.mean(dataframe['well_number'].value_counts().values)
-  sample_weight = {well: ratio/well_mean_weight for well, ratio in dataframe['well_number'].value_counts().items()}
-  sample_weight = {well: 1/ratio for well, ratio in sample_weight.items()}
+  well_mean_weight = np.mean(np.log(dataframe['well_number'].value_counts().values))
+  
+  sample_weight = {well: np.exp(well_mean_weight - ratio) for well, ratio in dataframe['well_number'].value_counts().items()}
+  sample_weight = {well: min(1/ratio, 5) for well, ratio in sample_weight.items()}
+  
   sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
   sample_weight = torch.tensor(list(sample_weight.values()))
   wells = sample_weight[wells].flatten()
