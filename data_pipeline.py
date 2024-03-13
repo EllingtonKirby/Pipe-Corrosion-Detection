@@ -231,7 +231,7 @@ def build_dataloaders_weighted(tau):
     
     sample_weight = {well: ratio/well_mean_weight for well, ratio in well_numbers.value_counts().items()}
     sample_weight = {well: min(1/ratio, 5) for well, ratio in sample_weight.items()}
-    
+    print("Sample weights: ", sample_weight)
     sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
     sample_weight = torch.tensor(list(sample_weight.values()))
     wells = sample_weight[wells].flatten()

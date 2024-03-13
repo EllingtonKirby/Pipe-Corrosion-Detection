@@ -319,6 +319,6 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
   return model, train_losses, train_ious, valid_losses, valid_ious
 
 if __name__ == '__main__':
-  tau = 5
+  tau = 3
   train_dl, valid_dl = build_dataloaders_weighted(tau=tau)
   train_weighted(train_dl, valid_dl, 100, 0.001)
