@@ -246,7 +246,7 @@ def build_dataloaders_weighted(tau):
     Y_train = Y_train.reshape(-1, 1, 36, 36)
 
     train_dataset = WellsDataset(X_train, Y_train, transform=image_label_transforms,  wells=Wells_train)
-    valid_dataset = WellsDataset(torch.empty(), torch.empty(), transform=None, wells=torch.empty())
+    valid_dataset = WellsDataset(torch.empty_like(X_train), torch.empty_like(Y_train), transform=None, wells=torch.empty_like(Wells_train))
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)
