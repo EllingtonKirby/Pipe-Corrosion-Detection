@@ -227,7 +227,7 @@ def build_dataloaders_weighted(tau):
                                    ))
     well_numbers = dataframe['well_number']
     wells = torch.from_numpy(np.vstack(well_numbers.to_numpy())) - 1
-    well_mean_weight = np.mean(np.log(well_numbers.value_counts().values))
+    well_mean_weight = np.mean(well_numbers.value_counts().values)
     
     sample_weight = {well: ratio/well_mean_weight for well, ratio in well_numbers.value_counts().items()}
     sample_weight = {well: min(1/ratio, 5) for well, ratio in sample_weight.items()}
