@@ -224,7 +224,7 @@ def build_dataloaders_weighted(tau):
     X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
     X = torch.nan_to_num(X)
     Y = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
-    
+
     well_numbers = dataframe['well_number']
     wells = torch.from_numpy(np.vstack(well_numbers.to_numpy())) - 1
     well_mean_weight = np.mean(well_numbers.value_counts().values)
@@ -246,7 +246,7 @@ def build_dataloaders_weighted(tau):
     Y_train = Y_train.reshape(-1, 1, 36, 36)
 
     train_dataset = WellsDataset(X_train, Y_train, transform=image_label_transforms,  wells=Wells_train)
-    valid_dataset = WellsDataset(torch.empty_like(X_train), torch.empty_like(Y_train), transform=None, wells=torch.empty_like(Wells_train))
+    valid_dataset = WellsDataset(torch.zeros(0), torch.zeros(0), transform=None, wells=torch.zeros(0))
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)
