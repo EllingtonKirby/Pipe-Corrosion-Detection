@@ -212,6 +212,7 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
     for input, labels, weights in tqdm(iter(train_dataloader)):
       input = input.to(DEVICE)
       labels = labels.to(DEVICE)
+      weights= weights.to(DEVICE)
       optimizer.zero_grad()
       preds, pseudo_label = model(input)
       dice_loss = dice_criterion(preds, labels, weights)
@@ -229,6 +230,7 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
       for input, labels, weights in tqdm(iter(validation_dataloader)):
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
+        weights= weights.to(DEVICE)
         preds, pseudo_label = model(input)
         dice_loss = dice_criterion(preds, labels, weights)
         class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights)
