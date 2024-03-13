@@ -70,6 +70,16 @@ class PseduoLabelBCELoss(nn.Module):
       labels = contains_ones.int()
       return F.binary_cross_entropy_with_logits(pseudo_label, labels.reshape(-1,1).float())
     
+# class WellIDLoss(nn.Module):
+#     def __init__(self, num_wells):
+#       super(WellIDLoss, self).__init__()
+#       self.num_wells = num_wells
+
+#     def forward(self, pos_out, pos_target, neg_out, neg_target, ):
+#       pos_loss = F.cross_entropy(pos_out, F.one_hot(pos_target, self.num_wells))
+#       neg_loss = F.cross_entropy(neg_out, F.one_hot(neg_target, self.num_wells))
+#       return pos_loss - neg_loss
+    
 class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
     def __init__(self, *args, **kwargs):
         super(VerboseReduceLROnPlateau, self).__init__(*args, **kwargs)
@@ -130,7 +140,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'unet_19.pt')
+  torch.save(model.state_dict(), 'unet_20.pt')
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
   metric = BinaryJaccardIndex().to(DEVICE)
@@ -189,7 +199,64 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
     
   return model, train_losses, train_ious, valid_losses, valid_ious 
 
+# def train_ensemble(well_model_mapping, well_group_mapping, train_dataloader, validation_dataloader, lr, num_epochs, num_wells):
+#   metric = BinaryJaccardIndex().to(DEVICE)
+#   dice_criterion = DiceBCELoss().to(DEVICE)
+#   pseudo_labeling_criterion = PseduoLabelBCELoss()
+#   well_id_criterion = WellIDLoss(num_wells=num_wells)
+#   optimizers = {torch.optim.Adam(params=model.parameters(), lr=lr)}
+#   scheduler = VerboseReduceLROnPlateau(optimizer, 'min', patience=5)
+
+#   train_losses = []
+#   train_ious = []
+#   valid_losses = []
+#   valid_ious = []
+
+#   for e in range(num_epochs):
+#     train_loss = 0
+#     train_iou = 0
+#     for input, labels, wells in tqdm(iter(train_dataloader)):
+#       input = input.to(DEVICE)
+#       labels = labels.to(DEVICE)
+#       optimizer.zero_grad()
+#       preds, pseudo_label = model(input)
+#       dice_loss = dice_criterion(preds, labels)
+#       class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+#       loss = dice_loss + class_loss
+#       iou = metric(preds, labels)
+#       train_loss += loss
+#       train_iou += iou
+#       loss.backward()
+#       optimizer.step()
+
+#     valid_loss = 0
+#     valid_iou = 0
+#     with torch.no_grad():
+#       for input, labels in tqdm(iter(validation_dataloader)):
+#         input = input.to(DEVICE)
+#         labels = labels.to(DEVICE)
+#         preds, pseudo_label = model(input)
+#         dice_loss = dice_criterion(preds, labels)
+#         class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+#         loss = dice_loss + class_loss
+#         iou = metric(preds, labels)
+#         valid_loss += loss
+#         valid_iou += iou
+    
+#     train_losses.append(train_loss.item() / len(train_dataloader))
+#     train_ious.append(train_iou.item() / len(train_dataloader))
+#     valid_losses.append(valid_loss.item() / len(validation_dataloader))
+#     valid_ious.append(valid_iou.item() / len(validation_dataloader))
+
+#     print(f'Epoch: {e}')
+#     print(f'Train loss:      {train_losses[-1]}')
+#     print(f'Validation loss: {valid_losses[-1]}')
+#     print(f'Train intersection over union:      {train_ious[-1]}')
+#     print(f'Validation intersection over union: {valid_ious[-1]}')
+#     scheduler.step(valid_losses[-1])
+    
+#   return model, train_losses, train_ious, valid_losses, valid_ious 
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  train(train_dl, valid_dl, 200, 0.001)
+  train(train_dl, valid_dl, 100, 0.001)
