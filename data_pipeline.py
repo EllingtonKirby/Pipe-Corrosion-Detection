@@ -236,18 +236,17 @@ def build_dataloaders_weighted(tau):
     sample_weight = torch.tensor(list(sample_weight.values()))
     wells = sample_weight[wells].flatten()
 
-    X_train, X_valid = X.float(), torch.zeros(0)
-    Y_train, Y_valid = Y.float(), torch.zeros(0)
-    Wells_train, Wells_valid = wells.float().reshape(-1, 1, 1, 1), torch.zeros(0).reshape(-1, 1, 1, 1)
+    X_train = X.float()
+    Y_train= Y.float()
+    Wells_train = wells.float().reshape(-1, 1, 1, 1)
 
     # Scale
     scaler = RobustScaler().fit(X_train)
-    X_train, X_valid = torch.from_numpy(scaler.transform(X_train)), torch.from_numpy(scaler.transform(X_valid))
-    X_train, X_valid = X_train.float().reshape(-1, 1, 36, 36), X_valid.float().reshape(-1, 1, 36, 36)
-    Y_train, Y_valid = Y_train.reshape(-1, 1, 36, 36), Y_valid.reshape(-1, 1, 36, 36)
+    X_train = torch.from_numpy(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
+    Y_train = Y_train.reshape(-1, 1, 36, 36)
 
     train_dataset = WellsDataset(X_train, Y_train, transform=image_label_transforms,  wells=Wells_train)
-    valid_dataset = WellsDataset(X_valid, Y_valid, transform=None, wells=Wells_valid)
+    valid_dataset = WellsDataset(torch.empty(), torch.empty(), transform=None, wells=torch.empty())
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)
