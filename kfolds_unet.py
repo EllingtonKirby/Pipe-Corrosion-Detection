@@ -38,7 +38,7 @@ def main():
       print(f"Unet with Steps: {model.n_steps}, Fold: {fold}")
       X_train, X_valid = X[train_indices].float().reshape(-1, 36*36), X[valid_indices].float().reshape(-1, 36*36)
       Y_train, Y_valid = Y[train_indices].float(), Y[valid_indices].float()
-      Wells_train, Wells_valid = wells[train_indices].float(), wells[valid_indices].float()
+      Wells_train, Wells_valid = wells[train_indices].float().reshape(-1, 1, 1, 1), wells[valid_indices].float().reshape(-1, 1, 1, 1)
 
       # Scale
       scaler = RobustScaler().fit(X_train)
