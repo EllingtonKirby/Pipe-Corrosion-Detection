@@ -82,7 +82,7 @@ class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
 
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
-  model = r2u_att.R2U_Net(img_ch=1, output_ch=1).to(DEVICE)
+  model = r2u_att.R2AttU_Net(img_ch=1, output_ch=1).to(DEVICE)
   if from_ckpt:
     model.load_state_dict(torch.load(from_ckpt))
   optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
@@ -99,7 +99,10 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       optimizer.zero_grad()
       preds, pseudo_label = model(input)
       dice_loss = dice_criterion(preds, labels)
-      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      if pseudo_label != None:
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      else:
+          class_loss = 0
       loss = dice_loss + class_loss
       iou = metric(preds, labels)
       train_loss += loss
@@ -115,7 +118,10 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
         labels = labels.to(DEVICE)
         preds, pseudo_label = model(input)
         dice_loss = dice_criterion(preds, labels)
-        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        if pseudo_label != None:
+          class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        else:
+           class_loss = 0
         loss = dice_loss + class_loss
         iou = metric(preds, labels)
         valid_loss += loss
@@ -130,7 +136,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
       scheduler.step(valid_iou / len(validation_dataloader))
     else:
       scheduler.step(train_iou / len(train_dataloader))
-  torch.save(model.state_dict(), 'r2u_1.pt') 
+  torch.save(model.state_dict(), 'r2u_att_2.pt') 
 
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, num_epochs):
