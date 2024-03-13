@@ -60,7 +60,9 @@ class DiceBCELoss(nn.Module):
         dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
         BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
         Dice_BCE = BCE + dice_loss
-        
+        print(Dice_BCE.shape)
+        print(weights.shape)
+        print((Dice_BCE * weights).shape)
         return Dice_BCE * weights
     
 class PseduoLabelBCELoss(nn.Module):
