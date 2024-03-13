@@ -46,7 +46,7 @@ class DiceBCELoss(nn.Module):
 
     def forward(self, inputs, targets, weights, smooth=1):
         if weights == None:
-           weights = torch.ones(targets.shape[0])
+           weights = torch.ones(targets.shape[0], 1, 1, 1).to(DEVICE)
         
         #comment out if your model contains a sigmoid or equivalent activation layer
         inputs = F.sigmoid(inputs)       
@@ -67,7 +67,7 @@ class PseduoLabelBCELoss(nn.Module):
 
     def forward(self, pseudo_label, targets, weights):
       if weights == None:
-            weights = torch.ones(targets.shape[0])
+            weights = torch.ones(targets.shape[0], 1, 1, 1).to(DEVICE)
           
       tensors = targets.flatten(start_dim=1)
       contains_ones = (tensors == 1).any(dim=1)
