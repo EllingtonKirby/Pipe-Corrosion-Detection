@@ -46,8 +46,8 @@ def main():
       X_train, X_valid = X_train.float().reshape(-1, 1, 36, 36), X_valid.float().reshape(-1, 1, 36, 36)
       Y_train, Y_valid = Y_train.reshape(-1, 1, 36, 36), Y_valid.reshape(-1, 1, 36, 36)
 
-      train_dataset = data_pipeline.WellsDataset(X_train, Y_train, Wells_train, transform=data_pipeline.image_label_transforms)
-      valid_dataset = data_pipeline.WellsDataset(X_valid, Y_valid, Wells_valid, transform=None)
+      train_dataset = data_pipeline.WellsDataset(X_train, Y_train, transform=data_pipeline.image_label_transforms,  wells=Wells_train)
+      valid_dataset = data_pipeline.WellsDataset(X_valid, Y_valid, transform=None, wells=Wells_valid)
 
       train_dataloader = DataLoader(train_dataset, batch_size=128)
       valid_dataloader = DataLoader(valid_dataset, batch_size=128)
