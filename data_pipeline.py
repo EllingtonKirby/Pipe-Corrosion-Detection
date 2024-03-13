@@ -139,7 +139,7 @@ def image_label_transforms(image, label, flipper):
         image = flipper(image)
         label = flipper(label)
 
-    image, _ = cutout(image, torch.zeros_like(image), size=12)
+    image, _ = cutout(image, torch.zeros_like(image), size=9)
 
     return image, label
 
