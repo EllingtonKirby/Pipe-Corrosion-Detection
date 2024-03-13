@@ -1,0 +1,28 @@
+/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torchvision/datapoints/__init__.py:12: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/torchvision/transforms/v2/__init__.py:54: UserWarning: The torchvision.datapoints and torchvision.transforms.v2 namespaces are still Beta. While we do not expect major breaking changes, some APIs may still change according to user feedback. Please submit any feedback you may have in this issue: https://github.com/pytorch/vision/issues/6753, and you can also check out https://github.com/pytorch/vision/issues/7319 to learn more about the APIs that we suspect might involve future changes. You can silence this warning by calling torchvision.disable_beta_transforms_warning().
+  warnings.warn(_BETA_TRANSFORMS_WARNING)
+/home/gpufs/users/students/iasd23/iasd23_ekirby/Pipe-Corrosion-Detection/data_pipeline.py:233: RuntimeWarning: divide by zero encountered in scalar divide
+  sample_weight = {well: min(1/ratio, tau) for well, ratio in sample_weight.items()}
+CUDA is available and is used
+Traceback (most recent call last):
+  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/Pipe-Corrosion-Detection/train_unet.py", line 323, in <module>
+    train_dl, valid_dl = build_dataloaders_weighted(tau=tau)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/Pipe-Corrosion-Detection/data_pipeline.py", line 245, in build_dataloaders_weighted
+    X_train, X_valid = torch.from_numpy(scaler.transform(X_train)), torch.from_numpy(scaler.transform(X_valid))
+                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/sklearn/utils/_set_output.py", line 140, in wrapped
+    data_to_wrap = f(self, X, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/sklearn/preprocessing/_data.py", line 1594, in transform
+    X = self._validate_data(
+        ^^^^^^^^^^^^^^^^^^^^
+  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/sklearn/base.py", line 604, in _validate_data
+    out = check_array(X, input_name="X", **check_params)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/gpufs/users/students/iasd23/iasd23_ekirby/ganenv/lib/python3.11/site-packages/sklearn/utils/validation.py", line 940, in check_array
+    raise ValueError(
+ValueError: Expected 2D array, got 1D array instead:
+array=[].
+Reshape your data either using array.reshape(-1, 1) if your data has a single feature or array.reshape(1, -1) if it contains a single sample.
