@@ -52,18 +52,16 @@ class DiceBCELoss(nn.Module):
         #comment out if your model contains a sigmoid or equivalent activation layer
         inputs = F.sigmoid(inputs)       
         
-        #flatten label and prediction tensors
-        inputs = inputs.view(-1)
-        targets = targets.view(-1)
+        inputs_flat = inputs.view(-1)
+        targets_flat = targets.view(-1)
+
+        intersection = (inputs_flat * targets_flat).sum(dim=0)
+        dice_loss = 1 - (2 * intersection + smooth) / (inputs_flat.sum(dim=0) + targets_flat.sum(dim=0) + smooth)
+        bce_loss = F.binary_cross_entropy(inputs_flat, targets_flat, reduction='none')
+
+        combined_loss = bce_loss + dice_loss
         
-        intersection = (inputs * targets).sum()                            
-        dice_loss = 1 - (2.*intersection + smooth)/(inputs.sum() + targets.sum() + smooth)  
-        BCE = F.binary_cross_entropy(inputs, targets, reduction='mean')
-        Dice_BCE = BCE + dice_loss
-        print(Dice_BCE.shape)
-        print(weights.shape)
-        print((Dice_BCE * weights).shape)
-        return Dice_BCE * weights
+        return torch.dot(combined_loss, weights) / len(targets)
     
 class PseduoLabelBCELoss(nn.Module):
     def __init__(self):
@@ -75,7 +73,7 @@ class PseduoLabelBCELoss(nn.Module):
       tensors = targets.flatten(start_dim=1)
       contains_ones = (tensors == 1).any(dim=1)
       labels = contains_ones.int()
-      return F.binary_cross_entropy_with_logits(pseudo_label, labels.reshape(-1,1).float()) * weights
+      return torch.dot(F.binary_cross_entropy_with_logits(pseudo_label, labels.reshape(-1,1).float(), reduction='none'), weights) / len(targets)
     
 class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
     def __init__(self, *args, **kwargs):
