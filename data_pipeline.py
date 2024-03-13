@@ -227,17 +227,17 @@ def build_dataloaders_weighted(tau):
                                    ))
     well_numbers = dataframe['well_number']
     wells = torch.from_numpy(np.vstack(well_numbers.to_numpy())) - 1
-    well_mean_weight = np.mean(np.log(dataframe['well_number'].value_counts().values))
+    well_mean_weight = np.mean(np.log(well_numbers.value_counts().values))
     
-    sample_weight = {well: np.exp(well_mean_weight - ratio) for well, ratio in dataframe['well_number'].value_counts().items()}
+    sample_weight = {well: np.exp(well_mean_weight - ratio) for well, ratio in well_numbers.value_counts().items()}
     sample_weight = {well: min(1/ratio, tau) for well, ratio in sample_weight.items()}
     
     sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
     sample_weight = torch.tensor(list(sample_weight.values()))
     wells = sample_weight[wells].flatten()
 
-    X_train, X_valid = X.float().reshape(-1, 1, 36, 36), torch.zeros(0)
-    Y_train, Y_valid = Y.float().reshape(-1, 1, 36, 36), torch.zeros(0)
+    X_train, X_valid = X.float(), torch.zeros(0)
+    Y_train, Y_valid = Y.float(), torch.zeros(0)
     Wells_train, Wells_valid = wells.float().reshape(-1, 1, 1, 1), torch.zeros(0).reshape(-1, 1, 1, 1)
 
     # Scale
