@@ -83,13 +83,38 @@ def build_test_dataframe(use_processed_images=True, limit_well_number=None):
         df = df[df['well_number'] == limit_well_number]
 
     return df
+
+def build_ensemble_dataloaders():
+    train_df = build_dataframe(use_processed_images=False, limit_well_number=None)
+    data = torch.from_numpy(np.vstack(train_df['data'].to_numpy()))
+    data = torch.nan_to_num(data)
+    labels = torch.from_numpy(np.vstack(train_df['labels'].to_numpy()))
+    wells = torch.from_numpy(np.vstack(train_df['well_number'].to_numpy()))
+    
+    p = np.random.permutation(len(data))
+    data, labels = data[p], labels[p]
+    offset = int(len(data) * .8)
+    X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
+    Y_train, Y_valid = labels[:offset].float().reshape(-1, 1, 36, 36), labels[offset:].float().reshape(-1, 1, 36, 36)
+    Wells_train, Wells_valid = wells[:offset].float().reshape(-1, 1), wells[offset:].float().reshape(-1, 1)
+    
+    well_groups = [3, 7, 13, 'rest']
+    well_group_dataloaders = {}
+    
+    for well in well_groups:
+        if well != 'rest':
+            well_mask = Wells_train == well
+            # x_well = 
+    
+    
 class WellsDataset(Dataset):
-    def __init__(self, data, labels, transform):
+    def __init__(self, data, labels, transform, wells=None):
         self.data = data
         self.labels = labels
         self.transform = transform
         if (self.transform):
             self.flipper = v2.RandomVerticalFlip(1)
+        self.wells = wells
 
     def __len__(self):
         return len(self.data)
@@ -99,6 +124,8 @@ class WellsDataset(Dataset):
         label = self.labels[idx]
         if self.transform:
             image, label = self.transform(image, label, self.flipper)
+        if self.wells != None:
+            return image, label, self.wells[idx]
         return image, label
     
 def image_label_transforms(image, label, flipper):
@@ -112,7 +139,7 @@ def image_label_transforms(image, label, flipper):
         image = flipper(image)
         label = flipper(label)
 
-    image, _ = cutout(image, torch.zeros_like(image), size=6)
+    image, _ = cutout(image, torch.zeros_like(image), size=12)
 
     return image, label
 
