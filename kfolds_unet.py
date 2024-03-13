@@ -19,7 +19,7 @@ def main():
   well_mean_weight = np.mean(well_numbers.value_counts().values)
   
   sample_weight = {well: ratio/well_mean_weight for well, ratio in well_numbers.value_counts().items()}
-  sample_weight = {well: min(1/ratio, 5) for well, ratio in sample_weight.items()}
+  sample_weight = {well: min(1/ratio, 3) for well, ratio in sample_weight.items()}
 
   sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
   print("Well weights: ", sample_weight)
