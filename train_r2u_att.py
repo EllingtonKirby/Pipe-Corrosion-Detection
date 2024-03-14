@@ -5,25 +5,7 @@ import r2u_att
 from torchmetrics.classification import BinaryJaccardIndex
 from tqdm import tqdm
 from data_pipeline import build_dataframe, build_dataloaders
-
-global DEVICE
-DEVICE = torch.device('cpu')
-if torch.cuda.is_available():
-  DEVICE = torch.device('cuda:0')
-  print("CUDA is available and is used")
-elif not torch.backends.mps.is_available():
-  if not torch.backends.mps.is_built():
-    print("MPS not available because the current PyTorch install was not "
-          "built with MPS enabled.")
-  else:
-      print("MPS not available because the current MacOS version is not 12.3+ "
-          "and/or you do not have an MPS-enabled device on this machine.")
-  DEVICE = torch.device('cpu')
-  print("CUDA and MPS are not available, switching to CPU.")
-else:
-  DEVICE = torch.device("mps")
-  print("CUDA not available, switching to MPS")
-
+from train_unet import DEVICE
 
 class DiceLoss(nn.Module):
   def __init__(self, weight=None, size_average=True):
@@ -275,5 +257,4 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
 if __name__ == '__main__':
   df = build_dataframe(use_processed_images=False, limit_well_number=None)
   train_dl, valid_dl = build_dataloaders(df, apply_scaling=True, apply_bulk_data_augmentations=False, split_train=False)
-  from_ckpt = None
-  train(train_dl, valid_dl, 100, 0.001, from_ckpt)
+  

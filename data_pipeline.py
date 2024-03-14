@@ -129,7 +129,7 @@ class WellsDataset(Dataset):
             return image, label, self.wells[idx]
         return image, label
     
-def image_label_transforms(image, label, flipper):
+def image_label_transforms(image, label, flipper, apply_cutout=False):
     axis = 2
     roll_distance = np.random.randint(0, 36)
     image = torch.roll(image, roll_distance, dims=axis)
@@ -140,22 +140,21 @@ def image_label_transforms(image, label, flipper):
         image = flipper(image)
         label = flipper(label)
 
-    # image, _ = cutout(image, torch.zeros_like(image), size=9)
+    if apply_cutout:
+        image = cutout(image, size=9)
 
     return image, label
 
-def cutout(image: torch.Tensor, label: torch.Tensor, size):
+def cutout(image: torch.Tensor, size):
     image_c = image.clone()
-    label_c = label.clone()
     h, w = image.shape[-2:]
 
     y = np.random.randint(0, h - size - 1)
     x = np.random.randint(0, w - size - 1)
 
     image_c[:, y:y + size, x:x + size] = 0
-    label_c[:, y:y + size, x:x + size] = 0
 
-    return image_c, label_c
+    return image_c
 
 def just_image_transforms(image, label, flipper):
     axis = 2
@@ -168,58 +167,27 @@ def just_image_transforms(image, label, flipper):
 
     return image, label
 
-def build_dataloaders(dataframe, apply_scaling=False, apply_bulk_data_augmentations=False, split_train=False):
+def build_dataloaders(dataframe, apply_cutout=False):
     data = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
     data = torch.nan_to_num(data)
     labels = torch.from_numpy(np.vstack(dataframe['labels'].to_numpy()))
 
-    if split_train:
-        p = np.random.permutation(len(data))
-        data, labels = data[p], labels[p]
-        with open('train_set_permutation.json', 'w') as f:
-            # Write permutation to file so that we can re-apply the same transform later
-            json.dump(p.tolist(), f)
+    X_train, X_valid = data.float().reshape(-1, 1, 36, 36), torch.zeros(0)
+    Y_train, Y_valid = labels.float().reshape(-1, 1, 36, 36), torch.zeros(0)
 
-        offset = int(len(data) * .8)
-        X_train, X_valid = data[:offset].float().reshape(-1, 1, 36, 36), data[offset:].float().reshape(-1, 1, 36, 36)
-        Y_train, Y_valid = labels[:offset].float().reshape(-1, 1, 36, 36), labels[offset:].float().reshape(-1, 1, 36, 36)
-    else:
-        X_train, X_valid = data.float().reshape(-1, 1, 36, 36), torch.zeros(0)
-        Y_train, Y_valid = labels.float().reshape(-1, 1, 36, 36), torch.zeros(0)
-
-    if (apply_scaling):
-        X_train, X_valid = X_train.reshape(-1, 36*36), X_valid.reshape(-1, 36*36)
-        scaler = RobustScaler().fit(X_train)
-        X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
-        if (split_train):
-            X_valid = torch.tensor(scaler.transform(X_valid)).float().reshape(-1, 1, 36, 36)
-
-    if apply_bulk_data_augmentations:
-        examples_to_augment = X_train
-        labels_to_augment = Y_train
-
-        rolled_x, rolled_y = [], []
-        for i in range(1, 36):
-            rolled_x.append(torch.roll(examples_to_augment, i, dims=3))
-            rolled_y.append(torch.roll(labels_to_augment, i, dims=3))
-
-        X_train, Y_train = torch.vstack((X_train, *rolled_x)), torch.vstack((Y_train, *rolled_y))
-
-        flipper = v2.RandomVerticalFlip(1)
-        X_train, Y_train = torch.vstack((X_train, flipper(examples_to_augment))), torch.vstack((Y_train, flipper(labels_to_augment)))
-
-        train_dataset = WellsDataset(X_train, Y_train, None)
-        valid_dataset = WellsDataset(X_valid, Y_valid, None)
-    else:
-        train_dataset = WellsDataset(X_train, Y_train, image_label_transforms)
-        valid_dataset = WellsDataset(X_valid, Y_valid, None)
+    X_train = X_train.reshape(-1, 36*36)
+    scaler = RobustScaler().fit(X_train)
+    X_train = torch.tensor(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
+    
+    train_dataset = WellsDataset(X_train, Y_train, lambda x, y, z: image_label_transforms(x,y,z,apply_cutout))
+    valid_dataset = WellsDataset(X_valid, Y_valid, None)
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)
     valid_dataloader = DataLoader(valid_dataset, batch_size=128)
 
     return train_dataloader, valid_dataloader
 
-def build_dataloaders_weighted(tau):
+def build_dataloaders_weighted(tau, gamma=None, apply_cutout=False):
     dataframe = build_dataframe(use_processed_images=False)
     X = torch.from_numpy(np.vstack(dataframe['data'].to_numpy()))
     X = torch.nan_to_num(X)
@@ -231,6 +199,8 @@ def build_dataloaders_weighted(tau):
     
     sample_weight = {well: ratio/well_mean_weight for well, ratio in well_numbers.value_counts().items()}
     sample_weight = {well: min(1/ratio, tau) for well, ratio in sample_weight.items()}
+    if gamma != None:
+        sample_weight = {well: max(gamma, ratio) for well, ratio in sample_weight.items()}
     print("Sample weights: ", sample_weight)
     sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
     sample_weight = torch.tensor(list(sample_weight.values()))
@@ -245,7 +215,7 @@ def build_dataloaders_weighted(tau):
     X_train = torch.from_numpy(scaler.transform(X_train)).float().reshape(-1, 1, 36, 36)
     Y_train = Y_train.reshape(-1, 1, 36, 36)
 
-    train_dataset = WellsDataset(X_train, Y_train, transform=image_label_transforms,  wells=Wells_train)
+    train_dataset = WellsDataset(X_train, Y_train, transform=lambda x, y, z: image_label_transforms(x,y,z,apply_cutout),  wells=Wells_train)
     valid_dataset = WellsDataset(torch.zeros(0), torch.zeros(0), transform=None, wells=torch.zeros(0))
 
     train_dataloader = DataLoader(train_dataset, batch_size=128)

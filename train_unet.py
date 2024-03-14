@@ -217,7 +217,10 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
       optimizer.zero_grad()
       preds, pseudo_label = model(input)
       dice_loss = dice_criterion(preds, labels)
-      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      if pseudo_label != None:
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      else: 
+        class_loss = 0
       loss = dice_loss + class_loss
       iou = metric(preds, labels)
       train_loss += loss
@@ -233,7 +236,10 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
         labels = labels.to(DEVICE)
         preds, pseudo_label = model(input)
         dice_loss = dice_criterion(preds, labels)
-        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        if pseudo_label != None:
+          class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        else: 
+          class_loss = 0
         loss = dice_loss + class_loss
         iou = metric(preds, labels)
         valid_loss += loss
@@ -319,6 +325,20 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
   return model, train_losses, train_ious, valid_losses, valid_ious
 
 if __name__ == '__main__':
-  tau = 3
+  dataframe = build_dataframe(use_processed_images=False, limit_well_number=None)
+  print("-"*100)
+  print("UNet With Cutout")
+  print("-"*100)
+  train_dl, valid_dl = build_dataloaders(dataframe, apply_cutout=True)
+  model = unet.UNet(1, 1, n_steps=4, bilinear=False, with_pl=True).to(DEVICE)
+  model, tloss, tiou, _, _ = train_local(model, train_dl, valid_dl, lr=.001, num_epochs=100)
+  torch.save(model.state_dict(), './checkponints/unet/unet_pl_cutout_100e.pt')
+
+  print("-"*100)
+  print("UNet With Tau 5")
+  print("-"*100)
+  tau = 5
   train_dl, valid_dl = build_dataloaders_weighted(tau=tau)
-  train_weighted(train_dl, valid_dl, 100, 0.001)
+  model = unet.UNet(1, 1, n_steps=4, bilinear=False, with_pl=True).to(DEVICE)
+  model, tloss, tiou, _, _ = train_local_weighted(model, train_dl, valid_dl, lr=0.001, num_epochs=100)
+  torch.save(model.state_dict(), './checkponints/unet/unet_pl_tau_5_100e.pt')
