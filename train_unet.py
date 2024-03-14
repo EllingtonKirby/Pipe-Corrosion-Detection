@@ -216,9 +216,9 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
       preds, pseudo_label = model(input)
-      dice_loss = dice_criterion(preds, labels)
+      dice_loss = dice_criterion(preds, labels, weights=None)
       if pseudo_label != None:
-        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
       else: 
         class_loss = 0
       loss = dice_loss + class_loss
@@ -235,9 +235,9 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
         input = input.to(DEVICE)
         labels = labels.to(DEVICE)
         preds, pseudo_label = model(input)
-        dice_loss = dice_criterion(preds, labels)
+        dice_loss = dice_criterion(preds, labels, weights=None)
         if pseudo_label != None:
-          class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+          class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
         else: 
           class_loss = 0
         loss = dice_loss + class_loss
