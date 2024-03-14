@@ -227,35 +227,40 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
       train_iou += iou
       loss.backward()
       optimizer.step()
-
-    valid_loss = 0
-    valid_iou = 0
-    with torch.no_grad():
-      for input, labels in tqdm(iter(validation_dataloader)):
-        input = input.to(DEVICE)
-        labels = labels.to(DEVICE)
-        preds, pseudo_label = model(input)
-        dice_loss = dice_criterion(preds, labels, weights=None)
-        if pseudo_label != None:
-          class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
-        else: 
-          class_loss = 0
-        loss = dice_loss + class_loss
-        iou = metric(preds, labels)
-        valid_loss += loss
-        valid_iou += iou
     
     train_losses.append(train_loss.item() / len(train_dataloader))
     train_ious.append(train_iou.item() / len(train_dataloader))
-    valid_losses.append(valid_loss.item() / len(validation_dataloader))
-    valid_ious.append(valid_iou.item() / len(validation_dataloader))
+    
+    if validation_dataloader != None:
+      valid_loss = 0
+      valid_iou = 0
+      with torch.no_grad():
+        for input, labels in tqdm(iter(validation_dataloader)):
+          input = input.to(DEVICE)
+          labels = labels.to(DEVICE)
+          preds, pseudo_label = model(input)
+          dice_loss = dice_criterion(preds, labels, weights=None)
+          if pseudo_label != None:
+            class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
+          else: 
+            class_loss = 0
+          loss = dice_loss + class_loss
+          iou = metric(preds, labels)
+          valid_loss += loss
+          valid_iou += iou
+    
+      valid_losses.append(valid_loss.item() / len(validation_dataloader))
+      valid_ious.append(valid_iou.item() / len(validation_dataloader))
 
     print(f'Epoch: {e}')
     print(f'Train loss:      {train_losses[-1]}')
-    print(f'Validation loss: {valid_losses[-1]}')
     print(f'Train intersection over union:      {train_ious[-1]}')
-    print(f'Validation intersection over union: {valid_ious[-1]}')
-    scheduler.step(valid_losses[-1])
+    if validation_dataloader != None:
+      print(f'Validation loss: {valid_losses[-1]}')
+      print(f'Validation intersection over union: {valid_ious[-1]}')
+      scheduler.step(valid_losses[-1])
+    else:
+      scheduler.step(train_losses[-1])
     
   return model, train_losses, train_ious, valid_losses, valid_ious 
 
@@ -292,35 +297,40 @@ def train_local_weighted(model: nn.Module, train_dataloader, validation_dataload
       loss.backward()
       optimizer.step()
 
-    valid_loss = 0
-    valid_iou = 0
-    with torch.no_grad():
-      for input, labels, weights in tqdm(iter(validation_dataloader)):
-        input = input.to(DEVICE)
-        labels = labels.to(DEVICE)
-        weights= weights.to(DEVICE)
-        preds, pseudo_label = model(input)
-        dice_loss = dice_criterion(preds, labels, weights)
-        if pseudo_label != None:
-          class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
-        else: 
-          class_loss = 0
-        loss = dice_loss + class_loss
-        iou = metric(preds, labels)
-        valid_loss += loss
-        valid_iou += iou
-    
     train_losses.append(train_loss.item() / len(train_dataloader))
     train_ious.append(train_iou.item() / len(train_dataloader))
-    valid_losses.append(valid_loss.item() / len(validation_dataloader))
-    valid_ious.append(valid_iou.item() / len(validation_dataloader))
+    
+    if validation_dataloader != None:
+      valid_loss = 0
+      valid_iou = 0
+      with torch.no_grad():
+        for input, labels, weights in tqdm(iter(validation_dataloader)):
+          input = input.to(DEVICE)
+          labels = labels.to(DEVICE)
+          weights= weights.to(DEVICE)
+          preds, pseudo_label = model(input)
+          dice_loss = dice_criterion(preds, labels, weights)
+          if pseudo_label != None:
+            class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
+          else: 
+            class_loss = 0
+          loss = dice_loss + class_loss
+          iou = metric(preds, labels)
+          valid_loss += loss
+          valid_iou += iou
+    
+      valid_losses.append(valid_loss.item() / len(validation_dataloader))
+      valid_ious.append(valid_iou.item() / len(validation_dataloader))
 
     print(f'Epoch: {e}')
     print(f'Train loss:      {train_losses[-1]}')
-    print(f'Validation loss: {valid_losses[-1]}')
     print(f'Train intersection over union:      {train_ious[-1]}')
-    print(f'Validation intersection over union: {valid_ious[-1]}')
-    scheduler.step(valid_losses[-1])
+    if validation_dataloader != None:
+      print(f'Validation loss: {valid_losses[-1]}')
+      print(f'Validation intersection over union: {valid_ious[-1]}')
+      scheduler.step(valid_losses[-1])
+    else:
+      scheduler.step(train_losses[-1])
     
   return model, train_losses, train_ious, valid_losses, valid_ious
 
