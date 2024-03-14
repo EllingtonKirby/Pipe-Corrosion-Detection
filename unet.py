@@ -28,9 +28,9 @@ class UNet(nn.Module):
             nn.MaxPool2d(2), # 1x1
             nn.Flatten(),
             nn.Dropout(),
-            nn.Linear(in_features=1024, out_features=1024),
-            nn.BatchNorm1d(num_features=1024),
-            nn.Linear(in_features=1024, out_features=1),
+            nn.Linear(in_features=1024//factor, out_features=1024//factor),
+            nn.BatchNorm1d(num_features=1024//factor),
+            nn.Linear(in_features=1024//factor, out_features=1),
         )
 
     def forward(self, x):
