@@ -175,7 +175,7 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, num_e
             input = input.to(DEVICE).repeat(1, 3, 1, 1)
             resized_input = F.interpolate(input, size=(64, 64), mode='bilinear', align_corners=False).to(DEVICE)
             labels = labels.to(DEVICE)
-            resized_labels = F.interpolate(labels.float(), size=(64, 64), mode='nearest').long().to(DEVICE)
+            resized_labels = F.interpolate(labels.float(), size=(64, 64), mode='nearest').float().to(DEVICE)
             optimizer.zero_grad()
             preds = model(resized_input)
             dice_loss = dice_criterion(preds, resized_labels, weights=None)
