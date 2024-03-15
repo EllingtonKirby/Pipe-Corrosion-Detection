@@ -28,7 +28,7 @@ class DiceBCELoss(nn.Module):
 
     def forward(self, inputs, targets, weights, smooth=1):
         if weights == None:
-           weights = torch.ones(targets.shape[0], 1, 1, 1)
+           weights = torch.ones(targets.shape[0], 1, 1, 1).to(DEVICE)
         
         #comment out if your model contains a sigmoid or equivalent activation layer
         inputs = F.sigmoid(inputs)       
