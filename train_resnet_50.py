@@ -158,7 +158,7 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, num_e
     #      class_loss = 0
       
       loss = dice_loss
-      iou = metric(preds, labels)
+      iou = metric(preds, resized_labels)
       train_loss += loss
       train_iou += iou
       loss.backward()
@@ -186,7 +186,7 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, num_e
             #     class_loss = 0
 
             loss = dice_loss
-            iou = metric(preds, labels)
+            iou = metric(preds, resized_labels)
             valid_loss += loss
             valid_iou += iou
       
