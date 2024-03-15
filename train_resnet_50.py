@@ -127,6 +127,7 @@ def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=Non
 
 
 def train_local(model: nn.Module, train_dataloader, validation_dataloader, num_epochs):
+  model = model.to(DEVICE)
   metric = BinaryJaccardIndex().to(DEVICE)
   dice_criterion = DiceBCELoss().to(DEVICE)
   pseudo_labeling_criterion = PseduoLabelBCELoss().to(DEVICE)
