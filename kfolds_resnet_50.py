@@ -41,8 +41,8 @@ def main():
                                                  transform=lambda x,y,z: data_pipeline.image_label_transforms(x,y,z,apply_cutout=False))
       valid_dataset = data_pipeline.WellsDataset(X_valid, Y_valid, transform=None)
 
-      train_dataloader = DataLoader(train_dataset, batch_size=32)
-      valid_dataloader = DataLoader(valid_dataset, batch_size=32)
+      train_dataloader = DataLoader(train_dataset, batch_size=64)
+      valid_dataloader = DataLoader(valid_dataset, batch_size=64)
       
       # Train
       _, _, _, valid_losses, valid_metrics = train_resnet_50.train_local(model, train_dataloader, valid_dataloader, num_epochs=50)
