@@ -43,7 +43,7 @@ class conv_block(nn.Module):
         x = self.conv(x)
         return x
 
-class up_conv(nn.Module):
+class up_conv_bilinear(nn.Module):
     def __init__(self,ch_in,ch_out):
         super(up_conv,self).__init__()
         self.up = nn.Sequential(
@@ -56,6 +56,20 @@ class up_conv(nn.Module):
     def forward(self,x):
         x = self.up(x)
         return x
+    
+class up_conv(nn.Module):
+    def __init__(self,ch_in,ch_out):
+        super(up_conv,self).__init__()
+        self.up = nn.Sequential(
+            nn.ConvTranspose2d(ch_in, ch_out, kernel_size=2, stride=2),
+		    nn.BatchNorm2d(ch_out),
+			nn.ReLU(inplace=True)
+        )
+
+    def forward(self,x):
+        x = self.up(x)
+        return x
+
 
 class Recurrent_block(nn.Module):
     def __init__(self,ch_out,t=2):

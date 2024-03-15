@@ -26,7 +26,12 @@ def main():
   sample_weight = collections.OrderedDict(sorted(sample_weight.items()))
   print("Well weights: ", sample_weight)
   sample_weight = torch.tensor(list(sample_weight.values()))
-  wells = sample_weight[wells].flatten()
+
+  weighted = False
+  if weighted:
+    wells = sample_weight[wells].flatten()
+  else:
+    wells = torch.ones_like(wells).flatten()
 
   splits = KFold(n_splits=5, shuffle=True)
 
@@ -51,7 +56,9 @@ def main():
       X_train, X_valid = X_train.float().reshape(-1, 1, 36, 36), X_valid.float().reshape(-1, 1, 36, 36)
       Y_train, Y_valid = Y_train.reshape(-1, 1, 36, 36), Y_valid.reshape(-1, 1, 36, 36)
 
-      train_dataset = data_pipeline.WellsDataset(X_train, Y_train, transform=data_pipeline.image_label_transforms,  wells=Wells_train)
+      train_dataset = data_pipeline.WellsDataset(X_train, Y_train, 
+                                                 transform=lambda x,y,z: data_pipeline.image_label_transforms(x,y,z,apply_cutout=False),  
+                                                 wells=Wells_train)
       valid_dataset = data_pipeline.WellsDataset(X_valid, Y_valid, transform=None, wells=Wells_valid)
 
       train_dataloader = DataLoader(train_dataset, batch_size=128)
