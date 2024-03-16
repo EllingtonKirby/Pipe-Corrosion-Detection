@@ -24,7 +24,7 @@ def main():
     model_losses = []
     model_metrics = []
     for fold, (train_indices, valid_indices) in enumerate(splits.split(X=X, y=Y)):
-      model = Unet(backbone_name='resnet18', classes=1, decoder_filters=(512, 256, 128, 64, 32))
+      model = Unet(backbone_name='resnet18', classes=1, decoder_filters=(512, 256, 128, 64, 32), pretrained=False)
       
       print("-"*100)
       print(f"ResNet50 Net Fold: {fold}")
