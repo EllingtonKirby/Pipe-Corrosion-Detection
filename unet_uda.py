@@ -85,14 +85,6 @@ for epoch in range(num_epochs):
         # Train the discriminator
         source_data, source_labels = next(source_iterator)
 
-        if len(source_data) != len(target_data):
-            perm = np.random.permutation(source_data)
-            source_data = source_data[perm]
-            source_data = source_data[:len(target_data)]
-            
-            source_labels = source_labels[perm]
-            source_labels = source_labels[:len(target_labels)]
-
         discriminator.zero_grad()
         optimizer_discriminator.zero_grad()
     
