@@ -57,6 +57,32 @@ class UNet(nn.Module):
 
         return logits, pseudo_label
 
+class Unet_Discriminator(nn.Module):
+    def __init__(self, n_channels=1,n_classes=1) -> None:
+        super().__init__()
+        self.inc = (DoubleConv(n_channels, 64))
+        self.down1 = (Down(64, 128))
+        self.down2 = (Down(128, 256))
+        self.down3 = (Down(256, 512))
+        self.down4 = (Down(512, 1024))    
+        self.classifier = nn.Sequential(
+            nn.MaxPool2d(2), # 1x1
+            nn.Flatten(),
+            nn.Dropout(),
+            nn.Linear(in_features=1024, out_features=1024),
+            nn.BatchNorm1d(num_features=1024),
+            nn.Linear(in_features=1024, out_features=n_classes),
+        )
+
+    def forward(self, input):
+        x1 = self.inc(input)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x5 = self.down4(x4)
+        pred = self.classifier(x5)
+        return F.sigmoid(pred)
+
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
 
