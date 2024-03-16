@@ -53,7 +53,7 @@ X_test, X_names, X_train, Y_train = build_tensors(test_df, train_df, apply_scali
 target_dataset = data_pipeline.WellsDataset(X_test, torch.zeros(len(X_test), 1), transform=None, wells=None)
 target_dl = DataLoader(target_dataset, batch_size=128)
 
-source_dataset = data_pipeline.WellsDataset(X_train, Y_train, transform=None, wells=None)
+source_dataset = data_pipeline.WellsDataset(X_train, Y_train.float().reshape(-1, 1, 36, 36), transform=None, wells=None)
 source_dl = DataLoader(source_dataset, batch_size=128)
 
 adversarial_loss = torch.nn.BCELoss(reduction='mean')
