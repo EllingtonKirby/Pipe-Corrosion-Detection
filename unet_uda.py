@@ -103,7 +103,7 @@ for epoch in range(num_epochs):
         discrim_on_target = discriminator(target_outputs)
 
         discriminator_loss = adversarial_loss(discrim_on_source, source_labels) + adversarial_loss(discrim_on_target, target_labels)
-        discriminator_losses.append(discriminator_loss.item().cpu().detach())
+        discriminator_losses.append(discriminator_loss.item())
         discriminator_loss.backward()
 
         discrim_source_accuracy = torch.sum((torch.round(discrim_on_source) == source_labels)) / len(source_labels)
@@ -123,7 +123,7 @@ for epoch in range(num_epochs):
         discrim_from_gen = discriminator(outputs)
 
         generator_loss = adversarial_loss(discrim_from_gen, target_labels)
-        generator_losses.append(generator_loss.item().cpu().detach())
+        generator_losses.append(generator_loss.item())
         generator_loss.backward()
 
         generator_accuracy = torch.sum((torch.round(discrim_from_gen) == target_labels)) / len(target_labels)
