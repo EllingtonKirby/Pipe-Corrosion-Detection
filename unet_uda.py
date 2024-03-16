@@ -73,7 +73,7 @@ optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=.001)
 
 metric = BinaryJaccardIndex().to(DEVICE)
 
-num_epochs = 10
+num_epochs = 50
 
 # Training loop
 for epoch in range(num_epochs):
@@ -157,7 +157,7 @@ for epoch in range(num_epochs):
         # test Validation of model on rest of training set
         generator.eval()
         train_iou = []
-        for (input, labels) in source_iterator:
+        for (input, labels) in tqdm(source_iterator):
             input = input.to(DEVICE)
             labels = labels.to(DEVICE)
             
