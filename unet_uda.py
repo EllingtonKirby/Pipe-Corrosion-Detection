@@ -88,6 +88,11 @@ for epoch in range(num_epochs):
         discriminator.zero_grad()
         optimizer_discriminator.zero_grad()
         generator.eval()
+
+        if len(target_data) != len(source_data):
+            # end of batch
+            source_data = source_data[0:len(target_data)]
+            source_labels = source_labels[0:len(target_data)]
     
         source_images = source_data.to(DEVICE)
         source_labels = source_labels.to(DEVICE)
