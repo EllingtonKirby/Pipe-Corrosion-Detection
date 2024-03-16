@@ -53,7 +53,7 @@ X_test, X_names, X_train, Y_train = build_tensors(test_df, train_df, apply_scali
 target_dataset = data_pipeline.WellsDataset(X_test, torch.zeros(len(X_test), 1), transform=None, wells=None)
 target_dl = DataLoader(target_dataset, batch_size=128)
 
-source_dataset = data_pipeline.WellsDataset(X_train, torch.ones(len(X_train), 1), transform=None, wells=None)
+source_dataset = data_pipeline.WellsDataset(X_train, Y_train, transform=None, wells=None)
 source_dl = DataLoader(source_dataset, batch_size=128)
 
 adversarial_loss = torch.nn.BCELoss(reduction='mean')
@@ -73,7 +73,7 @@ optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=.001)
 
 metric = BinaryJaccardIndex().to(DEVICE)
 
-num_epochs = 50
+num_epochs = 10
 
 # Training loop
 for epoch in range(num_epochs):
@@ -89,7 +89,8 @@ for epoch in range(num_epochs):
 
     for (target_data, target_labels) in tqdm(target_dl):
         # Train the discriminator
-        source_data, source_labels = next(source_iterator)
+        source_data, _ = next(source_iterator)
+        source_labels = torch.ones(len(target_data), 1)
 
         discriminator.zero_grad()
         optimizer_discriminator.zero_grad()
