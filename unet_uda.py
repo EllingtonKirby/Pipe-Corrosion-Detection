@@ -6,7 +6,8 @@ from torchvision import datasets, models, transforms
 from torch.utils.data import DataLoader, Dataset
 import torch.nn.functional as F
 import unet
-from train_unet import DEVICE
+from train_unet import DEVICE, DiceBCELoss
+from torchmetrics.classification import BinaryJaccardIndex
 import data_pipeline
 from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import RobustScaler
@@ -64,8 +65,13 @@ generator = generator.to(DEVICE)
 
 discriminator = unet.Unet_Discriminator(n_classes=1).to(DEVICE)
 
-optimizer_generator = optim.Adam(generator.parameters())
-optimizer_discriminator = optim.Adam(discriminator.parameters())
+adversarial_weight_source = 1.0 
+adversarial_weight_target = 1.0 
+
+optimizer_generator = optim.Adam(generator.parameters(), lr=.0001)
+optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=.001)
+
+metric = BinaryJaccardIndex().to(DEVICE)
 
 num_epochs = 50
 
@@ -108,7 +114,9 @@ for epoch in range(num_epochs):
         discrim_on_source = discriminator(source_features)
         discrim_on_target = discriminator(target_features)
 
-        discriminator_loss = adversarial_loss(discrim_on_source, source_labels) + adversarial_loss(discrim_on_target, target_labels)
+        discriminator_loss_source = adversarial_loss(discrim_on_source, source_labels) * adversarial_weight_source
+        discriminator_loss_target = adversarial_loss(discrim_on_target, target_labels) * adversarial_weight_target
+        discriminator_loss = discriminator_loss_source + discriminator_loss_target
         discriminator_losses.append(discriminator_loss.item())
         discriminator_loss.backward()
 
@@ -131,7 +139,9 @@ for epoch in range(num_epochs):
         discrim_from_gen_source = discriminator(source_features)
         discrim_from_gen_target = discriminator(target_features)
 
-        generator_loss = adversarial_loss(discrim_from_gen_source, target_labels) + adversarial_loss(discrim_from_gen_target, source_labels)
+        generator_loss_source = adversarial_loss(discrim_from_gen_source, target_labels) * adversarial_weight_source
+        generator_loss_target = adversarial_loss(discrim_from_gen_target, source_labels) * adversarial_weight_target
+        generator_loss = generator_loss_source + generator_loss_target
         generator_losses.append(generator_loss.item())
         generator_loss.backward()
 
@@ -142,6 +152,19 @@ for epoch in range(num_epochs):
 
         optimizer_generator.step()
 
+    with torch.no_grad():
+        # test Validation of model on rest of training set
+        generator.eval()
+        train_iou = []
+        for (input, labels) in source_iterator:
+            input = input.to(DEVICE)
+            labels = labels.to(DEVICE)
+            
+            preds,_,_ = generator(input)
+
+            train_iou.append(metric(preds, labels).item())
+
+
     print("-"*100)
     print(f"epoch: {epoch}")
     print(f"Losses:")
@@ -151,7 +174,8 @@ for epoch in range(num_epochs):
     print(f"Discrim on Source:          {np.mean(discriminator_source_accs)}")
     print(f"Discrim on Target:          {np.mean(discriminator_target_accs)}")
     print(f"Generator tricking discrim: {np.mean(generator_accs)}")
+    print(f"Generator train IoU:        {np.mean(train_iou)}")
 
 
-torch.save(generator.state_dict(), './unet_16_uda_1.pt')
-torch.save(discriminator.state_dict(), './discriminator_2.pt')
+torch.save(generator.state_dict(), './unet_16_uda_2.pt')
+torch.save(discriminator.state_dict(), './discriminator_3.pt')

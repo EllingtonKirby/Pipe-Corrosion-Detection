@@ -63,13 +63,13 @@ class Unet_Discriminator(nn.Module):
     def __init__(self, n_channels=1024, n_classes=1) -> None:
         super().__init__()
         self.classifier = nn.Sequential(
-            nn.Conv2d(n_channels, n_channels*2, kernel_size=2, stride=2),
-            nn.BatchNorm2d(n_channels*2),
-            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(n_channels, n_channels, kernel_size=2, stride=2),
+            nn.BatchNorm2d(n_channels),
+            nn.ReLU(),
             nn.Flatten(),
             nn.Dropout(),
-            nn.Linear(in_features=n_channels*2, out_features=n_channels),
-            nn.BatchNorm1d(num_features=n_channels),
+            nn.Linear(in_features=n_channels, out_features=n_channels),
+            nn.BatchNorm1d(n_channels),
             nn.ReLU(),
             nn.Linear(in_features=n_channels, out_features=n_classes),
         )
