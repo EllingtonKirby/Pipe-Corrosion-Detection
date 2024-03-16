@@ -81,7 +81,7 @@ for epoch in range(num_epochs):
     discriminator_target_accs = []
     generator_accs = []
 
-    for i, (target_data, target_labels) in tqdm(enumerate(target_dl)):
+    for (target_data, target_labels) in tqdm(target_dl):
         # Train the discriminator
         source_data, source_labels = next(source_iterator)
 
@@ -103,14 +103,14 @@ for epoch in range(num_epochs):
         discrim_on_target = discriminator(target_outputs)
 
         discriminator_loss = adversarial_loss(discrim_on_source, source_labels) + adversarial_loss(discrim_on_target, target_labels)
-        discriminator_losses.append(discriminator_loss.item())
+        discriminator_losses.append(discriminator_loss.item().cpu().detach())
         discriminator_loss.backward()
 
         discrim_source_accuracy = torch.sum((torch.round(discrim_on_source) == source_labels)) / len(source_labels)
         discrim_target_accuracy = torch.sum((torch.round(discrim_on_target) == target_labels)) / len(target_labels)
 
-        discriminator_source_accs.append(discrim_source_accuracy)
-        discriminator_target_accs.append(discrim_target_accuracy)
+        discriminator_source_accs.append(discrim_source_accuracy.cpu().detach())
+        discriminator_target_accs.append(discrim_target_accuracy.cpu().detach())
 
         optimizer_discriminator.step()
 
@@ -123,11 +123,11 @@ for epoch in range(num_epochs):
         discrim_from_gen = discriminator(outputs)
 
         generator_loss = adversarial_loss(discrim_from_gen, target_labels)
-        generator_losses.append(generator_loss.item())
+        generator_losses.append(generator_loss.item().cpu().detach())
         generator_loss.backward()
 
         generator_accuracy = torch.sum((torch.round(discrim_from_gen) == target_labels)) / len(target_labels)
-        generator_accs.append(generator_accuracy)
+        generator_accs.append(generator_accuracy.cpu().detach())
 
         optimizer_generator.step()
 
