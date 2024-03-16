@@ -62,7 +62,7 @@ generator = unet.UNet(n_channels=1, n_classes=1, n_steps=4, with_pl=True)
 generator.load_state_dict(torch.load('./checkpoints/unet/unet_16.pt', map_location=DEVICE))
 generator = generator.to(DEVICE)
 
-discriminator = unet.Unet_Discriminator(n_channels=1, n_classes=1).to(DEVICE)
+discriminator = unet.Unet_Discriminator(n_classes=1).to(DEVICE)
 
 optimizer_generator = optim.Adam(generator.parameters())
 optimizer_discriminator = optim.Adam(discriminator.parameters())
@@ -87,6 +87,7 @@ for epoch in range(num_epochs):
 
         discriminator.zero_grad()
         optimizer_discriminator.zero_grad()
+        generator.eval()
     
         source_images = source_data.to(DEVICE)
         source_labels = source_labels.to(DEVICE)
@@ -94,13 +95,13 @@ for epoch in range(num_epochs):
         target_images = target_data.to(DEVICE)
         target_labels = target_labels.to(DEVICE)
 
-        source_outputs, _ = generator(source_images)
-        source_outputs = source_outputs.detach()
-        target_outputs, _ = generator(target_images)
-        target_outputs = target_outputs.detach()
+        _, _, source_features = generator(source_images)
+        source_features = source_features.detach()
+        _, _, target_features = generator(target_images)
+        target_features = target_features.detach()
 
-        discrim_on_source = discriminator(source_outputs)
-        discrim_on_target = discriminator(target_outputs)
+        discrim_on_source = discriminator(source_features)
+        discrim_on_target = discriminator(target_features)
 
         discriminator_loss = adversarial_loss(discrim_on_source, source_labels) + adversarial_loss(discrim_on_target, target_labels)
         discriminator_losses.append(discriminator_loss.item())
@@ -115,19 +116,24 @@ for epoch in range(num_epochs):
         optimizer_discriminator.step()
 
         # Train the generator
+        generator.train()
         generator.zero_grad()
         optimizer_generator.zero_grad()
 
-        outputs, _ = generator(target_images)
+        _, _, source_features = generator(source_images)
+        _, _, target_features = generator(target_images)
 
-        discrim_from_gen = discriminator(outputs)
+        discrim_from_gen_source = discriminator(source_features)
+        discrim_from_gen_target = discriminator(target_features)
 
-        generator_loss = adversarial_loss(discrim_from_gen, target_labels)
+        generator_loss = adversarial_loss(discrim_from_gen_source, target_labels) + adversarial_loss(discrim_from_gen_target, source_labels)
         generator_losses.append(generator_loss.item())
         generator_loss.backward()
 
-        generator_accuracy = torch.sum((torch.round(discrim_from_gen) == target_labels)) / len(target_labels)
-        generator_accs.append(generator_accuracy.cpu().detach())
+        generator_accuracy = torch.sum((torch.round(discrim_from_gen_source) == target_labels)) + torch.sum((torch.round(discrim_from_gen_target) == source_labels))
+        generator_accuracy = generator_accuracy.item()
+        generator_accuracy /= (len(target_labels) + len(source_labels))
+        generator_accs.append(generator_accuracy)
 
         optimizer_generator.step()
 
@@ -137,10 +143,10 @@ for epoch in range(num_epochs):
     print(f"Discriminator loss: {np.mean(discriminator_losses)}")
     print(f"Generator loss: {np.mean(generator_losses)}")
     print(f"Accs:")
-    print(f"Discrim on Source: {np.mean(discriminator_source_accs)}")
-    print(f"Discrim on Target: {np.mean(discriminator_target_accs)}")
-    print(f"Generator from Target: {np.mean(generator_accs)}")
+    print(f"Discrim on Source:          {np.mean(discriminator_source_accs)}")
+    print(f"Discrim on Target:          {np.mean(discriminator_target_accs)}")
+    print(f"Generator tricking discrim: {np.mean(generator_accs)}")
 
 
-torch.save(generator.state_dict(), './unet_16_generator.pt')
-torch.save(discriminator.state_dict(), './discriminator_1.pt')
+torch.save(generator.state_dict(), './unet_16_uda_1.pt')
+torch.save(discriminator.state_dict(), './discriminator_2.pt')

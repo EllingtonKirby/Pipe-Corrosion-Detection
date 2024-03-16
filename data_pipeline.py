@@ -232,15 +232,20 @@ def build_test_dataloaders(test_dataframe, train_dataframe, apply_scaling=False)
     train_data = torch.nan_to_num(train_data)
     Y_train = torch.from_numpy(np.vstack(train_dataframe['labels'].to_numpy()))
 
-    if apply_scaling:
-        train_data, test_data = train_data.reshape(-1, 36*36), test_data.reshape(-1, 36*36)
-        scaler = RobustScaler().fit(train_data)
-        train_data = torch.tensor(scaler.transform(train_data)).float().reshape(-1, 1, 36, 36)
-        test_data = torch.tensor(scaler.transform(test_data)).float().reshape(-1, 1, 36, 36)
+    count_less_than_neg_10 = torch.sum(test_data < -10, dim=1)
+    total_elements_per_row = test_data.size(1)
+    ratios = count_less_than_neg_10.float() / total_elements_per_row
+    outliers = (ratios > .01).flatten()
+    test_data[test_data < -10] = 0
+
+    train_data, test_data = train_data.reshape(-1, 36*36), test_data.reshape(-1, 36*36)
+    scaler = RobustScaler().fit(train_data)
+    train_data = torch.tensor(scaler.transform(train_data)).float().reshape(-1, 1, 36, 36)
+    test_data = torch.tensor(scaler.transform(test_data)).float().reshape(-1, 1, 36, 36)
 
     X_test = test_data.float().reshape(-1, 1, 36, 36)
     X_train = train_data.float().reshape(-1, 1, 36, 36)
-    return X_test, X_names, X_train, Y_train
+    return X_test, X_names, X_train, Y_train, outliers
 
 
 def build_dataloaders_for_classiication(train_dataframe, apply_scaling=False, apply_bulk_data_augmentations=False):
