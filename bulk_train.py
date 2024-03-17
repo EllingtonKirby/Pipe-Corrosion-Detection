@@ -13,36 +13,10 @@ if __name__ == '__main__':
     dataframe = build_dataframe(use_processed_images=False, limit_well_number=None)
 
     print("-"*100)
-    print("UNet With Tau 5, Gamma None")
+    print("UNet With Tau 2, Gamma None")
     print("-"*100)
-    tau = 5
+    tau = 2
     train_dl, _ = build_dataloaders_weighted(tau=tau, gamma=None, apply_cutout=False)
     model = unet.UNet(1, 1, n_steps=4, bilinear=False, with_pl=True).to(DEVICE)
     model, tloss, tiou, _, _ = train_unet.train_local_weighted(model, train_dl, None, lr=0.001, num_epochs=100)
-    torch.save(model.state_dict(), './unet_pl_tau_5_gamma_none_100e.pt')
-
-    print("-"*100)
-    print("UNet With Cutout")
-    print("-"*100)
-    train_dl, _ = build_dataloaders(dataframe, apply_cutout=True)
-    model = unet.UNet(1, 1, n_steps=4, bilinear=False, with_pl=True).to(DEVICE)
-    model, tloss, tiou, _, _ = train_unet.train_local(model, train_dl, None, lr=.001, num_epochs=100)
-    torch.save(model.state_dict(), './unet_pl_cutout_100e.pt')
-
-    print("-"*100)
-    print("AttU Net")
-    print("-"*100)
-    train_dl, _ = build_dataloaders(dataframe, apply_cutout=False)
-    model = attunet.AttU_Net(1, 1).to(DEVICE)
-    model, tloss, tiou, _, _ = train_r2u_att.train_local(model, train_dl, None, lr=.001, num_epochs=100)
-    torch.save(model.state_dict(), './attunet_100e.pt')
-
-    print("-"*100)
-    print("UNet With Tau 5, Gamma 1")
-    print("-"*100)
-    tau = 5
-    gamma = 1
-    train_dl, _ = build_dataloaders_weighted(tau=tau, gamma=gamma, apply_cutout=False)
-    model = unet.UNet(1, 1, n_steps=4, bilinear=False, with_pl=True).to(DEVICE)
-    model, tloss, tiou, _, _ = train_unet.train_local_weighted(model, train_dl, None, lr=0.001, num_epochs=100)
-    torch.save(model.state_dict(), './unet_pl_tau_5_gamma_1_100e.pt')
+    torch.save(model.state_dict(), './unet_pl_tau_2_gamma_none_100e.pt')
