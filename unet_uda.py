@@ -6,7 +6,7 @@ from torchvision import datasets, models, transforms
 from torch.utils.data import DataLoader, Dataset
 import torch.nn.functional as F
 import unet
-from train_unet import DEVICE, DiceBCELoss
+from train_unet import DEVICE, DiceBCELoss, PseduoLabelBCELoss
 from torchmetrics.classification import BinaryJaccardIndex
 import data_pipeline
 from torch.utils.data import DataLoader, TensorDataset
@@ -72,6 +72,8 @@ optimizer_generator = optim.Adam(generator.parameters())
 optimizer_discriminator = optim.Adam(discriminator.parameters())
 
 metric = BinaryJaccardIndex().to(DEVICE)
+dice_criterion = DiceBCELoss().to(DEVICE)
+pseudo_labeling_criterion = PseduoLabelBCELoss()
 
 num_epochs = 50
 
@@ -92,7 +94,6 @@ for epoch in range(num_epochs):
         source_data, _ = next(source_iterator)
         source_labels = torch.ones(len(target_data), 1)
 
-        discriminator.zero_grad()
         optimizer_discriminator.zero_grad()
         generator.eval()
 
@@ -131,7 +132,6 @@ for epoch in range(num_epochs):
 
         # Train the generator
         generator.train()
-        generator.zero_grad()
         optimizer_generator.zero_grad()
 
         _, _, source_features = generator(source_images)
@@ -153,17 +153,23 @@ for epoch in range(num_epochs):
 
         optimizer_generator.step()
 
-    with torch.no_grad():
-        # test Validation of model on rest of training set
-        generator.eval()
-        train_iou = []
-        for (input, labels) in tqdm(source_iterator):
-            input = input.to(DEVICE)
-            labels = labels.to(DEVICE)
-            
-            preds,_,_ = generator(input)
+    # test Validation of model on rest of training set
+    train_iou = []
+    for (input, labels) in tqdm(source_iterator):
+        input = input.to(DEVICE)
+        labels = labels.to(DEVICE)
+        optimizer_generator.zero_grad()
+        preds,pseudo_label,_ = generator(input)
 
-            train_iou.append(metric(preds, labels).item())
+        dice_loss = dice_criterion(preds, labels)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        loss = dice_loss + class_loss
+        iou = metric(preds, labels)
+        train_iou += iou
+        loss.backward()
+        optimizer_generator.step()
+
+        train_iou.append(metric(preds, labels).item())
 
 
     print("-"*100)
