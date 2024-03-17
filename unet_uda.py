@@ -164,12 +164,9 @@ for epoch in range(num_epochs):
         dice_loss = dice_criterion(preds, labels, weights=None)
         class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
         loss = dice_loss + class_loss
-        iou = metric(preds, labels)
-        train_iou += iou
         loss.backward()
-        optimizer_generator.step()
-
         train_iou.append(metric(preds, labels).item())
+        optimizer_generator.step()
 
 
     print("-"*100)
