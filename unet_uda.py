@@ -68,8 +68,8 @@ discriminator = unet.Unet_Discriminator(n_classes=1).to(DEVICE)
 adversarial_weight_source = 1.0 
 adversarial_weight_target = 1.0 
 
-optimizer_generator = optim.Adam(generator.parameters(), lr=.0001)
-optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=.001)
+optimizer_generator = optim.Adam(generator.parameters())
+optimizer_discriminator = optim.Adam(discriminator.parameters())
 
 metric = BinaryJaccardIndex().to(DEVICE)
 
