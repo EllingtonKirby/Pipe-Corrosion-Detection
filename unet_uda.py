@@ -161,8 +161,8 @@ for epoch in range(num_epochs):
         optimizer_generator.zero_grad()
         preds,pseudo_label,_ = generator(input)
 
-        dice_loss = dice_criterion(preds, labels)
-        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        dice_loss = dice_criterion(preds, labels, weights=None)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
         loss = dice_loss + class_loss
         iou = metric(preds, labels)
         train_iou += iou
