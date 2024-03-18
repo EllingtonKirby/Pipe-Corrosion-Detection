@@ -223,7 +223,7 @@ def build_dataloaders_weighted(tau, gamma=None, apply_cutout=False):
 
     return train_dataloader, valid_dataloader
 
-def build_test_dataloaders(test_dataframe, train_dataframe, apply_scaling=False):
+def build_test_dataloaders(test_dataframe, train_dataframe, keep_negs=False):
     test_data = torch.from_numpy(np.vstack(test_dataframe['data'].to_numpy()))
     test_data = torch.nan_to_num(test_data)
     X_names = np.vstack(test_dataframe['filename'].to_numpy())
@@ -232,11 +232,14 @@ def build_test_dataloaders(test_dataframe, train_dataframe, apply_scaling=False)
     train_data = torch.nan_to_num(train_data)
     Y_train = torch.from_numpy(np.vstack(train_dataframe['labels'].to_numpy()))
 
-    count_less_than_neg_10 = torch.sum(test_data < -10, dim=1)
-    total_elements_per_row = test_data.size(1)
-    ratios = count_less_than_neg_10.float() / total_elements_per_row
-    outliers = (ratios > .01).flatten()
-    test_data[test_data < -10] = 0
+    if keep_negs:
+        count_less_than_neg_10 = torch.sum(test_data < -10, dim=1)
+        total_elements_per_row = test_data.size(1)
+        ratios = count_less_than_neg_10.float() / total_elements_per_row
+        outliers = (ratios > .01).flatten()
+        test_data[test_data < -10] = 0
+    else:
+        outliers = ((test_data.min(dim=1, keepdim=True).values < -10) == True).flatten()
 
     train_data, test_data = train_data.reshape(-1, 36*36), test_data.reshape(-1, 36*36)
     scaler = RobustScaler().fit(train_data)

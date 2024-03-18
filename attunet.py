@@ -152,6 +152,6 @@ class AttU_Net(nn.Module):
 
         d1 = self.Conv_1x1(d2)
 
-        # pseudo_label = self.pseudo_label(x5)
+        pseudo_label = self.pseudo_label(x5)
         
-        return d1, None
+        return d1, pseudo_label
