@@ -68,7 +68,7 @@ target_dl = DataLoader(target_dataset, batch_size=128)
 source_dataset = data_pipeline.WellsDataset(X_train[:len(X_test)], Y_train[:len(X_test)].float().reshape(-1, 1, 36, 36), transform=diff_augment, wells=None)
 source_dl = DataLoader(source_dataset, batch_size=128)
 
-source_dataset_val = data_pipeline.WellsDataset(X_train[len(X_test):], Y_train[len(X_test):].float().reshape(-1, 1, 36, 36), transform=None, wells=None)
+source_dataset_val = data_pipeline.WellsDataset(X_train[len(X_test):], Y_train[len(X_test):].float().reshape(-1, 1, 36, 36), transform=diff_augment, wells=None)
 source_dl_val = DataLoader(source_dataset_val, batch_size=128)
 
 # Define your UNet, discriminator, and optimizer
@@ -166,7 +166,8 @@ def train_adversarial_uda():
 
         discriminator_source_accs = []
         discriminator_target_accs = []
-        generator_accs = []
+        generator_source_to_targ_accs = []
+        generator_targ_to_source_accs = []
 
         for (target_data, _) in tqdm(target_dl):
             # Train the discriminator
@@ -202,8 +203,8 @@ def train_adversarial_uda():
             discriminator_losses.append(discriminator_loss.item())
             discriminator_loss.backward()
 
-            discrim_source_accuracy = torch.sum((torch.round(discrim_on_source) == source_labels)) / len(source_labels)
-            discrim_target_accuracy = torch.sum((torch.round(discrim_on_target) == target_labels)) / len(target_labels)
+            discrim_source_accuracy = torch.sum((torch.round(discrim_on_source).squeeze() == source_labels.squeeze())) / len(source_labels)
+            discrim_target_accuracy = torch.sum((torch.round(discrim_on_target).squeeze() == target_labels.squeeze())) / len(target_labels)
 
             discriminator_source_accs.append(discrim_source_accuracy.cpu().detach())
             discriminator_target_accs.append(discrim_target_accuracy.cpu().detach())
@@ -214,25 +215,28 @@ def train_adversarial_uda():
             generator.train()
             optimizer_generator.zero_grad()
 
-            # _, _, source_features = generator(source_images)
+            _, _, source_features = generator(source_images)
             _, _, target_features = generator(target_images)
 
-            # discrim_from_gen_source = discriminator(source_features)
+            discrim_from_gen_source = discriminator(source_features)
             discrim_from_gen_target = discriminator(target_features)
 
-            # generator_loss_source = adversarial_loss(discrim_from_gen_source, source_labels) * adversarial_weight_source
+            generator_loss_source = adversarial_loss(discrim_from_gen_source, target_labels) * adversarial_weight_source
             generator_loss_target = adversarial_loss(discrim_from_gen_target, source_labels) * adversarial_weight_target
-            # generator_loss = generator_loss_source + generator_loss_target
-            generator_loss = generator_loss_target
+            generator_loss = generator_loss_source + generator_loss_target
+            # generator_loss = generator_loss_target
             generator_losses.append(generator_loss.item())
             generator_loss.backward()
 
             # generator_accuracy = torch.sum((torch.round(discrim_from_gen_source) == source_labels)) + torch.sum((torch.round(discrim_from_gen_target) == source_labels))
-            generator_accuracy = torch.sum((torch.round(discrim_from_gen_target) == source_labels))
-            generator_accuracy = generator_accuracy.item()
+            generator_accuracy_source_to_targ = torch.sum((torch.round(discrim_from_gen_source) == target_labels)).item()
+            generator_accuracy_targ_to_source = torch.sum((torch.round(discrim_from_gen_target) == source_labels)).item()
+            # generator_accuracy = generator_accuracy.item()
             # generator_accuracy /= (len(target_labels) + len(source_labels))
-            generator_accuracy /= (len(target_labels))
-            generator_accs.append(generator_accuracy)
+            generator_accuracy_source_to_targ /= (len(target_labels))
+            generator_accuracy_targ_to_source /= (len(target_labels))
+            generator_source_to_targ_accs.append(generator_accuracy_source_to_targ)
+            generator_targ_to_source_accs.append(generator_accuracy_targ_to_source)
 
             optimizer_generator.step()
 
@@ -255,13 +259,14 @@ def train_adversarial_uda():
         print("-"*100)
         print(f"epoch: {epoch}")
         print(f"Losses:")
-        print(f"Discriminator loss: {np.mean(discriminator_losses)}")
-        print(f"Generator loss: {np.mean(generator_losses)}")
+        print(f"Discriminator loss:                  {np.mean(discriminator_losses)}")
+        print(f"Generator loss:                      {np.mean(generator_losses)}")
         print(f"Accs:")
-        print(f"Discrim on Source:          {np.mean(discriminator_source_accs)}")
-        print(f"Discrim on Target:          {np.mean(discriminator_target_accs)}")
-        print(f"Generator tricking discrim: {np.mean(generator_accs)}")
-        print(f"Generator train IoU:        {np.mean(train_iou)}")
+        print(f"Discrim on Source:                   {np.mean(discriminator_source_accs)}")
+        print(f"Discrim on Target:                   {np.mean(discriminator_target_accs)}")
+        print(f"Generator tricking source as target: {np.mean(generator_source_to_targ_accs)}")
+        print(f"Generator tricking target as source: {np.mean(generator_targ_to_source_accs)}")
+        print(f"Generator train IoU:                 {np.mean(train_iou)}")
 
 
     torch.save(generator.state_dict(), './unet_16_uda_3_augments_only_discrim_target.pt')
