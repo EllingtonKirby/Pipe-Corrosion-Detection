@@ -41,8 +41,9 @@ class DiceLoss(nn.Module):
     return 1 - dice
 
 class DiceBCELoss(nn.Module):
-    def __init__(self):
+    def __init__(self, aggregate=True):
         super(DiceBCELoss, self).__init__()
+        self.aggregate=aggregate
 
     def forward(self, inputs, targets, weights, smooth=1):
         if weights == None:
@@ -59,11 +60,15 @@ class DiceBCELoss(nn.Module):
         bce_loss = F.binary_cross_entropy(inputs_flat, targets_flat, reduction='none')
         combined_loss = bce_loss + dice_loss
         
-        return (combined_loss*weights).sum() / len(targets)
+        if self.aggregate:
+          return (combined_loss*weights).sum() / len(targets)
+        else:
+          return combined_loss*weights
     
 class PseduoLabelBCELoss(nn.Module):
-    def __init__(self):
-          super(PseduoLabelBCELoss, self).__init__()
+    def __init__(self, aggregate=True):
+      super(PseduoLabelBCELoss, self).__init__()
+      self.aggregate=aggregate
 
     def forward(self, pseudo_label, targets, weights):
       if weights == None:
@@ -73,7 +78,10 @@ class PseduoLabelBCELoss(nn.Module):
       contains_ones = (tensors == 1).any(dim=1)
       labels = contains_ones.int()
       bce = F.binary_cross_entropy_with_logits(pseudo_label, labels.view(-1,1).float(), reduction='none')
-      return (bce * weights).sum() / len(targets)
+      if self.aggregate:
+        return (bce * weights).sum() / len(targets)
+      else:
+        return bce * weights
     
 class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
     def __init__(self, *args, **kwargs):
@@ -87,6 +95,58 @@ class VerboseReduceLROnPlateau(torch.optim.lr_scheduler.ReduceLROnPlateau):
 
 
 def train(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
+  model = unet.UNet(n_channels=1, n_classes=1, n_steps=4).to(DEVICE)
+  if from_ckpt:
+    model.load_state_dict(torch.load(from_ckpt))
+  optimizer = torch.optim.Adam(lr=lr, params=model.parameters())
+  metric = BinaryJaccardIndex().to(DEVICE)
+  dice_criterion = DiceBCELoss().to(DEVICE)
+  pseudo_labeling_criterion = PseduoLabelBCELoss()
+  scheduler = VerboseReduceLROnPlateau(optimizer, 'max', patience=3)
+  for e in range(num_epochs):
+    train_loss = 0
+    train_iou = 0
+    for input, labels in tqdm(iter(train_dataloader)):
+      input = input.to(DEVICE)
+      labels = labels.to(DEVICE)
+      optimizer.zero_grad()
+      preds, pseudo_label = model(input)
+      dice_loss = dice_criterion(preds, labels)
+      class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+      loss = dice_loss + class_loss
+      iou = metric(preds, labels)
+      train_loss += loss
+      train_iou += iou
+      loss.backward()
+      optimizer.step()
+
+    valid_loss = 0
+    valid_iou = 0
+    with torch.no_grad():
+      for input, labels in tqdm(iter(validation_dataloader)):
+        input = input.to(DEVICE)
+        labels = labels.to(DEVICE)
+        preds = model(input)
+        dice_loss = dice_criterion(preds, labels)
+        class_loss = pseudo_labeling_criterion(pseudo_label, labels)
+        loss = dice_loss + class_loss
+        iou = metric(preds, labels)
+        valid_loss += loss
+        valid_iou += iou
+    
+    print(f'Epoch: {e}')
+    print(f'Train loss:      {train_loss / len(train_dataloader)}')
+    print(f'Train intersection over union:      {train_iou/ len(train_dataloader)}')
+    if (len(validation_dataloader) > 0):
+      print(f'Validation loss: {valid_loss/ len(validation_dataloader)}')
+      print(f'Validation intersection over union: {valid_iou/ len(validation_dataloader)}')
+      scheduler.step(valid_iou / len(validation_dataloader))
+    else:
+      scheduler.step(train_iou / len(train_dataloader))
+  torch.save(model.state_dict(), 'unet_20.pt')
+
+
+def train_vrex(train_dataloader, validation_dataloader, num_epochs, lr, from_ckpt=None):
   model = unet.UNet(n_channels=1, n_classes=1, n_steps=4).to(DEVICE)
   if from_ckpt:
     model.load_state_dict(torch.load(from_ckpt))
