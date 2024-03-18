@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from sklearn.preprocessing import RobustScaler
 from tqdm import tqdm
 
-def diff_augment(image, label):
+def diff_augment(image, label, flipper):
     axis = 2
     roll_distance = np.random.randint(0, 36, size=(image.shape[0], 1))
     image = torch.roll(image, roll_distance, dims=axis)
@@ -60,7 +60,7 @@ X_test, X_names, X_train, Y_train = build_tensors(test_df, train_df)
 target_dataset = data_pipeline.WellsDataset(X_test, torch.zeros(len(X_test), 1), transform=diff_augment, wells=None)
 target_dl = DataLoader(target_dataset, batch_size=128)
 
-source_dataset = data_pipeline.WellsDataset(X_train, Y_train.float().reshape(-1, 1, 36, 36), transform=None, wells=None)
+source_dataset = data_pipeline.WellsDataset(X_train, Y_train.float().reshape(-1, 1, 36, 36), transform=diff_augment, wells=None)
 source_dl = DataLoader(source_dataset, batch_size=128)
 
 adversarial_loss = torch.nn.BCELoss(reduction='mean')
@@ -93,7 +93,7 @@ def train_emin_uda():
 
         generator_losses = []
 
-        for (target_data, target_labels) in tqdm(target_dl):
+        for (target_data, _) in tqdm(target_dl):
             # Train the discriminator
             source_data, source_labels = next(source_iterator)
             
@@ -108,7 +108,6 @@ def train_emin_uda():
             source_labels = source_labels.to(DEVICE)
 
             target_images = target_data.to(DEVICE)
-            target_labels = target_labels.to(DEVICE)
 
             source_preds, source_class_pred, _ = generator(source_images)
             source_dice_loss = dice_criterion(source_preds, source_labels, weights=None)
