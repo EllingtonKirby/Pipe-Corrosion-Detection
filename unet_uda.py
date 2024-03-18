@@ -241,19 +241,19 @@ def train_adversarial_uda():
             optimizer_generator.step()
 
         # test Validation of model on rest of training set
-        train_iou = []
-        for (input, labels) in tqdm(source_dl_val):
-            input = input.to(DEVICE)
-            labels = labels.to(DEVICE)
-            optimizer_generator.zero_grad()
-            preds,pseudo_label,_ = generator(input)
+        # train_iou = []
+        # for (input, labels) in tqdm(source_dl_val):
+        #     input = input.to(DEVICE)
+        #     labels = labels.to(DEVICE)
+        #     optimizer_generator.zero_grad()
+        #     preds,pseudo_label,_ = generator(input)
 
-            dice_loss = dice_criterion(preds, labels, weights=None)
-            class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
-            loss = dice_loss + class_loss
-            loss.backward()
-            train_iou.append(metric(preds, labels).item())
-            optimizer_generator.step()
+        #     dice_loss = dice_criterion(preds, labels, weights=None)
+        #     class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
+        #     loss = dice_loss + class_loss
+        #     loss.backward()
+        #     train_iou.append(metric(preds, labels).item())
+        #     optimizer_generator.step()
 
 
         print("-"*100)
@@ -266,10 +266,10 @@ def train_adversarial_uda():
         print(f"Discrim on Target:                   {np.mean(discriminator_target_accs)}")
         print(f"Generator tricking source as target: {np.mean(generator_source_to_targ_accs)}")
         print(f"Generator tricking target as source: {np.mean(generator_targ_to_source_accs)}")
-        print(f"Generator train IoU:                 {np.mean(train_iou)}")
+        # print(f"Generator train IoU:                 {np.mean(train_iou)}")
 
 
-    torch.save(generator.state_dict(), './unet_16_uda_4_augments_both_discrim.pt')
-    torch.save(discriminator.state_dict(), './discriminator_5.pt')
+    torch.save(generator.state_dict(), './unet_16_uda_5_augments_no_val.pt')
+    torch.save(discriminator.state_dict(), './discriminator_6.pt')
 
 train_adversarial_uda()
