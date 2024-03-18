@@ -1,0 +1,501 @@
+CUDA is available and is used
+----------------------------------------------------------------------------------------------------
+epoch: 0
+Losses:
+Discriminator loss: 1.3088243258626837
+Generator loss: 1.4583371626703363
+Accs:
+Discrim on Source:          0.46277040243148804
+Discrim on Target:          0.7555057406425476
+Generator tricking discrim: 0.5204964875111507
+Generator train IoU:        0.773605262791669
+----------------------------------------------------------------------------------------------------
+epoch: 1
+Losses:
+Discriminator loss: 1.0147641426638554
+Generator loss: 1.3891668696152537
+Accs:
+Discrim on Source:          0.7887070775032043
+Discrim on Target:          0.9052324891090393
+Generator tricking discrim: 0.5360587644959857
+Generator train IoU:        0.7682155635621812
+----------------------------------------------------------------------------------------------------
+epoch: 2
+Losses:
+Discriminator loss: 0.8630979061126709
+Generator loss: 1.308894671891865
+Accs:
+Discrim on Source:          0.8094893097877502
+Discrim on Target:          0.8938935995101929
+Generator tricking discrim: 0.6144938949598573
+Generator train IoU:        0.7655640410052406
+----------------------------------------------------------------------------------------------------
+epoch: 3
+Losses:
+Discriminator loss: 0.6595612607504192
+Generator loss: 1.3246236412148726
+Accs:
+Discrim on Source:          0.9415421485900879
+Discrim on Target:          0.8972179293632507
+Generator tricking discrim: 0.6204177352809991
+Generator train IoU:        0.7622353688434318
+----------------------------------------------------------------------------------------------------
+epoch: 4
+Losses:
+Discriminator loss: 0.6082785960875059
+Generator loss: 1.3300646982694928
+Accs:
+Discrim on Source:          0.9286420941352844
+Discrim on Target:          0.8766516447067261
+Generator tricking discrim: 0.595262321587868
+Generator train IoU:        0.7561013875184236
+----------------------------------------------------------------------------------------------------
+epoch: 5
+Losses:
+Discriminator loss: 0.689348212982479
+Generator loss: 1.4570144038451345
+Accs:
+Discrim on Source:          0.8659539222717285
+Discrim on Target:          0.9143831133842468
+Generator tricking discrim: 0.6053328501338091
+Generator train IoU:        0.7371926142109765
+----------------------------------------------------------------------------------------------------
+epoch: 6
+Losses:
+Discriminator loss: 0.9264758652762363
+Generator loss: 1.375755592396385
+Accs:
+Discrim on Source:          0.7952720522880554
+Discrim on Target:          0.8342161178588867
+Generator tricking discrim: 0.6174732381801963
+Generator train IoU:        0.6989124516646067
+----------------------------------------------------------------------------------------------------
+epoch: 7
+Losses:
+Discriminator loss: 0.7974906046139566
+Generator loss: 1.2044868092787893
+Accs:
+Discrim on Source:          0.9141252636909485
+Discrim on Target:          0.8576118350028992
+Generator tricking discrim: 0.6746034511596788
+Generator train IoU:        0.6981804117008492
+----------------------------------------------------------------------------------------------------
+epoch: 8
+Losses:
+Discriminator loss: 0.6291895634249637
+Generator loss: 1.1852183028271324
+Accs:
+Discrim on Source:          0.933994472026825
+Discrim on Target:          0.9481140971183777
+Generator tricking discrim: 0.6910786964763604
+Generator train IoU:        0.7073069755677823
+----------------------------------------------------------------------------------------------------
+epoch: 9
+Losses:
+Discriminator loss: 0.48369135668403224
+Generator loss: 1.1608260336675142
+Accs:
+Discrim on Source:          0.9425666332244873
+Discrim on Target:          0.9524350166320801
+Generator tricking discrim: 0.7065956735057984
+Generator train IoU:        0.7072944398279544
+----------------------------------------------------------------------------------------------------
+epoch: 10
+Losses:
+Discriminator loss: 0.54063313415176
+Generator loss: 1.1562053843548423
+Accs:
+Discrim on Source:          0.9268719553947449
+Discrim on Target:          0.9139857888221741
+Generator tricking discrim: 0.7139063893844781
+Generator train IoU:        0.7108968187261511
+----------------------------------------------------------------------------------------------------
+epoch: 11
+Losses:
+Discriminator loss: 0.6270561735881003
+Generator loss: 1.3095849564200954
+Accs:
+Discrim on Source:          0.8965139985084534
+Discrim on Target:          0.8953500986099243
+Generator tricking discrim: 0.6797014384478144
+Generator train IoU:        0.7035949495103624
+----------------------------------------------------------------------------------------------------
+epoch: 12
+Losses:
+Discriminator loss: 0.628686702565143
+Generator loss: 1.3470705684862638
+Accs:
+Discrim on Source:          0.8714736104011536
+Discrim on Target:          0.9011694192886353
+Generator tricking discrim: 0.6800045996877787
+Generator train IoU:        0.6906177589186916
+----------------------------------------------------------------------------------------------------
+epoch: 13
+Losses:
+Discriminator loss: 0.7058940090631184
+Generator loss: 1.3100031614303589
+Accs:
+Discrim on Source:          0.8614866137504578
+Discrim on Target:          0.8641628623008728
+Generator tricking discrim: 0.7039334299732382
+Generator train IoU:        0.6641881344494996
+----------------------------------------------------------------------------------------------------
+epoch: 14
+Losses:
+Discriminator loss: 0.777682081649178
+Generator loss: 1.16887387790178
+Accs:
+Discrim on Source:          0.8368852734565735
+Discrim on Target:          0.8518133759498596
+Generator tricking discrim: 0.7105019235057984
+Generator train IoU:        0.6563577409143801
+----------------------------------------------------------------------------------------------------
+epoch: 15
+Losses:
+Discriminator loss: 0.8044278998123972
+Generator loss: 1.35028874874115
+Accs:
+Discrim on Source:          0.8421609997749329
+Discrim on Target:          0.8476458191871643
+Generator tricking discrim: 0.6665365744870652
+Generator train IoU:        0.6521466076374054
+----------------------------------------------------------------------------------------------------
+epoch: 16
+Losses:
+Discriminator loss: 0.8839427013146249
+Generator loss: 1.1555488674264205
+Accs:
+Discrim on Source:          0.814681351184845
+Discrim on Target:          0.8020670413970947
+Generator tricking discrim: 0.7249700323371989
+Generator train IoU:        0.6366504243126622
+----------------------------------------------------------------------------------------------------
+epoch: 17
+Losses:
+Discriminator loss: 0.8782367423961037
+Generator loss: 1.106671480756057
+Accs:
+Discrim on Source:          0.8411365151405334
+Discrim on Target:          0.852517306804657
+Generator tricking discrim: 0.7299007582515611
+Generator train IoU:        0.6202823563858315
+----------------------------------------------------------------------------------------------------
+epoch: 18
+Losses:
+Discriminator loss: 0.7398290038108826
+Generator loss: 1.1307871247592725
+Accs:
+Discrim on Source:          0.8708742260932922
+Discrim on Target:          0.8706094026565552
+Generator tricking discrim: 0.7064946197591436
+Generator train IoU:        0.603621983969653
+----------------------------------------------------------------------------------------------------
+epoch: 19
+Losses:
+Discriminator loss: 0.733748668118527
+Generator loss: 1.315970700038107
+Accs:
+Discrim on Source:          0.8592982888221741
+Discrim on Target:          0.8645740151405334
+Generator tricking discrim: 0.6628707627118644
+Generator train IoU:        0.5995816301416468
+----------------------------------------------------------------------------------------------------
+epoch: 20
+Losses:
+Discriminator loss: 0.685182987075103
+Generator loss: 1.1248650488100553
+Accs:
+Discrim on Source:          0.8919212818145752
+Discrim on Target:          0.8880811929702759
+Generator tricking discrim: 0.7145858887154326
+Generator train IoU:        0.5974664511503996
+----------------------------------------------------------------------------------------------------
+epoch: 21
+Losses:
+Discriminator loss: 0.5422729222398055
+Generator loss: 1.022785484790802
+Accs:
+Discrim on Source:          0.9370191693305969
+Discrim on Target:          0.9263213276863098
+Generator tricking discrim: 0.7204853367528992
+Generator train IoU:        0.5921647868774556
+----------------------------------------------------------------------------------------------------
+epoch: 22
+Losses:
+Discriminator loss: 0.5466848251066709
+Generator loss: 1.1154949602327848
+Accs:
+Discrim on Source:          0.915226399898529
+Discrim on Target:          0.9172752499580383
+Generator tricking discrim: 0.7205445751561106
+Generator train IoU:        0.5885676322159944
+----------------------------------------------------------------------------------------------------
+epoch: 23
+Losses:
+Discriminator loss: 0.5739006619704398
+Generator loss: 1.1723484773384898
+Accs:
+Discrim on Source:          0.9073442220687866
+Discrim on Target:          0.9237915873527527
+Generator tricking discrim: 0.7086899252899197
+Generator train IoU:        0.5681262838619726
+----------------------------------------------------------------------------------------------------
+epoch: 24
+Losses:
+Discriminator loss: 0.5695312760378185
+Generator loss: 1.0672225167876797
+Accs:
+Discrim on Source:          0.9038456082344055
+Discrim on Target:          0.9144667387008667
+Generator tricking discrim: 0.7420306924620874
+Generator train IoU:        0.5351359744866689
+----------------------------------------------------------------------------------------------------
+epoch: 25
+Losses:
+Discriminator loss: 0.602697635951795
+Generator loss: 0.8524583923189264
+Accs:
+Discrim on Source:          0.9041731953620911
+Discrim on Target:          0.9100761413574219
+Generator tricking discrim: 0.7877766781891168
+Generator train IoU:        0.5170296877622604
+----------------------------------------------------------------------------------------------------
+epoch: 26
+Losses:
+Discriminator loss: 0.5642750216157812
+Generator loss: 0.7395533935019845
+Accs:
+Discrim on Source:          0.919533371925354
+Discrim on Target:          0.8997129201889038
+Generator tricking discrim: 0.8252397413024086
+Generator train IoU:        0.5001359913084242
+----------------------------------------------------------------------------------------------------
+epoch: 27
+Losses:
+Discriminator loss: 0.5876649853430296
+Generator loss: 0.6484387948324806
+Accs:
+Discrim on Source:          0.9087798595428467
+Discrim on Target:          0.9097903370857239
+Generator tricking discrim: 0.8405093108831401
+Generator train IoU:        0.48558012589260385
+----------------------------------------------------------------------------------------------------
+epoch: 28
+Losses:
+Discriminator loss: 0.6242094902615798
+Generator loss: 0.6529438087814733
+Accs:
+Discrim on Source:          0.9125432372093201
+Discrim on Target:          0.8797669410705566
+Generator tricking discrim: 0.834595924397859
+Generator train IoU:        0.4805242794531363
+----------------------------------------------------------------------------------------------------
+epoch: 29
+Losses:
+Discriminator loss: 0.5304557226206127
+Generator loss: 0.5961864418105075
+Accs:
+Discrim on Source:          0.9228994250297546
+Discrim on Target:          0.9245372414588928
+Generator tricking discrim: 0.862552966101695
+Generator train IoU:        0.47714732587337494
+----------------------------------------------------------------------------------------------------
+epoch: 30
+Losses:
+Discriminator loss: 0.6488318678579832
+Generator loss: 0.5831033854108107
+Accs:
+Discrim on Source:          0.8716129660606384
+Discrim on Target:          0.9070723652839661
+Generator tricking discrim: 0.8473043041926851
+Generator train IoU:        0.4674903380650061
+----------------------------------------------------------------------------------------------------
+epoch: 31
+Losses:
+Discriminator loss: 0.7713694258740074
+Generator loss: 0.6609009159238715
+Accs:
+Discrim on Source:          0.8594794869422913
+Discrim on Target:          0.8500989675521851
+Generator tricking discrim: 0.8350384701159679
+Generator train IoU:        0.4624138005353786
+----------------------------------------------------------------------------------------------------
+epoch: 32
+Losses:
+Discriminator loss: 0.7570965117529819
+Generator loss: 0.7373844981193542
+Accs:
+Discrim on Source:          0.8593610525131226
+Discrim on Target:          0.8658843040466309
+Generator tricking discrim: 0.8112455396966994
+Generator train IoU:        0.4569198516783891
+----------------------------------------------------------------------------------------------------
+epoch: 33
+Losses:
+Discriminator loss: 0.7248003514189469
+Generator loss: 0.6649131555306284
+Accs:
+Discrim on Source:          0.8819901347160339
+Discrim on Target:          0.8620441555976868
+Generator tricking discrim: 0.8272852085191793
+Generator train IoU:        0.44937402561858847
+----------------------------------------------------------------------------------------------------
+epoch: 34
+Losses:
+Discriminator loss: 0.7843886958925348
+Generator loss: 0.7899812005068126
+Accs:
+Discrim on Source:          0.8595770597457886
+Discrim on Target:          0.8567685484886169
+Generator tricking discrim: 0.7880763548171276
+Generator train IoU:        0.44582736602535955
+----------------------------------------------------------------------------------------------------
+epoch: 35
+Losses:
+Discriminator loss: 0.9406377469238482
+Generator loss: 0.7149627255766016
+Accs:
+Discrim on Source:          0.8070500493049622
+Discrim on Target:          0.7884352803230286
+Generator tricking discrim: 0.8371989295272079
+Generator train IoU:        0.43041198783450657
+----------------------------------------------------------------------------------------------------
+epoch: 36
+Losses:
+Discriminator loss: 0.9567807379521822
+Generator loss: 0.7061792392479745
+Accs:
+Discrim on Source:          0.8478618264198303
+Discrim on Target:          0.7382220029830933
+Generator tricking discrim: 0.849572786574487
+Generator train IoU:        0.41917883301222764
+----------------------------------------------------------------------------------------------------
+epoch: 37
+Losses:
+Discriminator loss: 1.1056859712851674
+Generator loss: 0.8535985005529303
+Accs:
+Discrim on Source:          0.7259352803230286
+Discrim on Target:          0.7498257756233215
+Generator tricking discrim: 0.8076424509366638
+Generator train IoU:        0.4231986844981158
+----------------------------------------------------------------------------------------------------
+epoch: 38
+Losses:
+Discriminator loss: 1.1963261083552712
+Generator loss: 1.1282913339765448
+Accs:
+Discrim on Source:          0.7553314566612244
+Discrim on Target:          0.7344865202903748
+Generator tricking discrim: 0.707616664808207
+Generator train IoU:        0.3997033663369991
+----------------------------------------------------------------------------------------------------
+epoch: 39
+Losses:
+Discriminator loss: 1.051100570904581
+Generator loss: 1.04252606002908
+Accs:
+Discrim on Source:          0.7952930331230164
+Discrim on Target:          0.7489824891090393
+Generator tricking discrim: 0.7686287355040143
+Generator train IoU:        0.39083528021971387
+----------------------------------------------------------------------------------------------------
+epoch: 40
+Losses:
+Discriminator loss: 0.951425629226785
+Generator loss: 1.0045811031994067
+Accs:
+Discrim on Source:          0.8400353789329529
+Discrim on Target:          0.793529748916626
+Generator tricking discrim: 0.812266530999108
+Generator train IoU:        0.3954649644869345
+----------------------------------------------------------------------------------------------------
+epoch: 41
+Losses:
+Discriminator loss: 1.073157614783237
+Generator loss: 0.7504941381906208
+Accs:
+Discrim on Source:          0.7347652316093445
+Discrim on Target:          0.7363054752349854
+Generator tricking discrim: 0.8448685604371098
+Generator train IoU:        0.38794593788959364
+----------------------------------------------------------------------------------------------------
+epoch: 42
+Losses:
+Discriminator loss: 1.059973512825213
+Generator loss: 0.7246528487456473
+Accs:
+Discrim on Source:          0.768015444278717
+Discrim on Target:          0.7607744336128235
+Generator tricking discrim: 0.8631906500892059
+Generator train IoU:        0.3846589050911091
+----------------------------------------------------------------------------------------------------
+epoch: 43
+Losses:
+Discriminator loss: 1.1609064497445758
+Generator loss: 0.7334108964393014
+Accs:
+Discrim on Source:          0.7460066080093384
+Discrim on Target:          0.749763011932373
+Generator tricking discrim: 0.8736479705619982
+Generator train IoU:        0.3782699864219736
+----------------------------------------------------------------------------------------------------
+epoch: 44
+Losses:
+Discriminator loss: 1.0881947843652022
+Generator loss: 1.034722256033044
+Accs:
+Discrim on Source:          0.8046108484268188
+Discrim on Target:          0.7755352258682251
+Generator tricking discrim: 0.7715453557091883
+Generator train IoU:        0.3679872011696851
+----------------------------------------------------------------------------------------------------
+epoch: 45
+Losses:
+Discriminator loss: 0.9817562385609275
+Generator loss: 0.9118838090645639
+Accs:
+Discrim on Source:          0.7801488637924194
+Discrim on Target:          0.7908048033714294
+Generator tricking discrim: 0.8117926237734165
+Generator train IoU:        0.364259315861596
+----------------------------------------------------------------------------------------------------
+epoch: 46
+Losses:
+Discriminator loss: 1.0638658184754222
+Generator loss: 0.9054503911419919
+Accs:
+Discrim on Source:          0.7579448819160461
+Discrim on Target:          0.7821142077445984
+Generator tricking discrim: 0.8003909734611954
+Generator train IoU:        0.3509638486085115
+----------------------------------------------------------------------------------------------------
+epoch: 47
+Losses:
+Discriminator loss: 0.9600448169206318
+Generator loss: 0.730546811693593
+Accs:
+Discrim on Source:          0.7848531007766724
+Discrim on Target:          0.815636157989502
+Generator tricking discrim: 0.8583993086529883
+Generator train IoU:        0.3412175101262552
+----------------------------------------------------------------------------------------------------
+epoch: 48
+Losses:
+Discriminator loss: 1.069809775603445
+Generator loss: 0.8692023942345067
+Accs:
+Discrim on Source:          0.7755212783813477
+Discrim on Target:          0.751010537147522
+Generator tricking discrim: 0.819988431088314
+Generator train IoU:        0.3311735595817919
+----------------------------------------------------------------------------------------------------
+epoch: 49
+Losses:
+Discriminator loss: 1.0123827708394904
+Generator loss: 0.9344207675833451
+Accs:
+Discrim on Source:          0.7906375527381897
+Discrim on Target:          0.7738208174705505
+Generator tricking discrim: 0.8098551795272079
+Generator train IoU:        0.3296275950140423
