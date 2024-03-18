@@ -141,7 +141,7 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
   for e in range(num_epochs):
     train_loss = 0
     train_iou = 0
-    for input, labels in tqdm(iter(train_dataloader)):
+    for input, labels in tqdm(train_dataloader):
       input = input.to(DEVICE)
       labels = labels.to(DEVICE)
       optimizer.zero_grad()
@@ -165,7 +165,7 @@ def train_local(model: nn.Module, train_dataloader, validation_dataloader, lr, n
       valid_loss = 0
       valid_iou = 0
       with torch.no_grad():
-        for input, labels in tqdm(iter(validation_dataloader)):
+        for input, labels in tqdm(validation_dataloader):
           input = input.to(DEVICE)
           labels = labels.to(DEVICE)
           preds, pseudo_label = model(input)
