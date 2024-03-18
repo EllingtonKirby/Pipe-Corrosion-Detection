@@ -50,7 +50,7 @@ def build_tensors(test_dataframe, train_dataframe):
     X_test = test_data.float().reshape(-1, 1, 36, 36)
     X_train = train_data.float().reshape(-1, 1, 36, 36)
     
-    p = np.random.permutation(X_train)
+    p = np.random.permutation(len(X_train))
     X_train = X_train[p]
     Y_train = Y_train[p]
 
