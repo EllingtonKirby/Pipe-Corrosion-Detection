@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 def diff_augment(image, label, flipper):
     axis = 2
-    roll_distance = np.random.randint(0, 36, size=(image.shape[0], 1))
+    roll_distance = np.random.randint(0, 36)
     image = torch.roll(image, roll_distance, dims=axis)
     label = torch.roll(label, roll_distance, dims=axis)
 
