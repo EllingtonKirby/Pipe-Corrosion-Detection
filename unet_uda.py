@@ -57,7 +57,7 @@ train_df = data_pipeline.build_dataframe(use_processed_images=False, limit_well_
 
 X_test, X_names, X_train, Y_train = build_tensors(test_df, train_df)
 
-target_dataset = data_pipeline.WellsDataset(X_test, torch.zeros(len(X_test), 1), transform=diff_augment, wells=None)
+target_dataset = data_pipeline.WellsDataset(X_test, torch.zeros(len(X_test), 1, 36, 36), transform=diff_augment, wells=None)
 target_dl = DataLoader(target_dataset, batch_size=128)
 
 source_dataset = data_pipeline.WellsDataset(X_train, Y_train.float().reshape(-1, 1, 36, 36), transform=diff_augment, wells=None)
