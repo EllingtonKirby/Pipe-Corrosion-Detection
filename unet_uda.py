@@ -269,7 +269,7 @@ def train_adversarial_uda():
         print(f"Generator train IoU:                 {np.mean(train_iou)}")
 
 
-    torch.save(generator.state_dict(), './unet_16_uda_3_augments_only_discrim_target.pt')
-    torch.save(discriminator.state_dict(), './discriminator_4.pt')
+    torch.save(generator.state_dict(), './unet_16_uda_4_augments_both_discrim.pt')
+    torch.save(discriminator.state_dict(), './discriminator_5.pt')
 
 train_adversarial_uda()
