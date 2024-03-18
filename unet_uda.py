@@ -49,6 +49,11 @@ def build_tensors(test_dataframe, train_dataframe):
 
     X_test = test_data.float().reshape(-1, 1, 36, 36)
     X_train = train_data.float().reshape(-1, 1, 36, 36)
+    
+    p = np.random.permutation(X_train)
+    X_train = X_train[p]
+    Y_train = Y_train[p]
+
     return X_test, X_names, X_train, Y_train
 
 
@@ -63,7 +68,8 @@ target_dl = DataLoader(target_dataset, batch_size=128)
 source_dataset = data_pipeline.WellsDataset(X_train, Y_train.float().reshape(-1, 1, 36, 36), transform=diff_augment, wells=None)
 source_dl = DataLoader(source_dataset, batch_size=128)
 
-adversarial_loss = torch.nn.BCELoss(reduction='mean')
+source_dataset_val = data_pipeline.WellsDataset(X_train[:len(X_test)], Y_train[:len(X_test)].float().reshape(-1, 1, 36, 36), transform=None, wells=None)
+source_dl_val = DataLoader(source_dataset_val, batch_size=128)
 
 # Define your UNet, discriminator, and optimizer
 generator = unet.UNet(n_channels=1, n_classes=1, n_steps=4, with_pl=True)
@@ -79,11 +85,12 @@ lmbda = 1.0
 optimizer_generator = optim.Adam(generator.parameters(), lr=.0001)
 optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=.001)
 
+adversarial_loss = torch.nn.BCELoss(reduction='mean')
 metric = BinaryJaccardIndex().to(DEVICE)
 dice_criterion = DiceBCELoss().to(DEVICE)
 pseudo_labeling_criterion = PseduoLabelBCELoss()
 
-num_epochs = 50
+num_epochs = 30
 
 def train_emin_uda():
     # Training loop
@@ -152,7 +159,6 @@ def train_emin_uda():
 def train_adversarial_uda():
     # Training loop
     for epoch in range(num_epochs):
-        source_dl = DataLoader(source_dataset, batch_size=128, shuffle=True)
         source_iterator = iter(source_dl)
 
         discriminator_losses = []
@@ -208,7 +214,7 @@ def train_adversarial_uda():
             generator.train()
             optimizer_generator.zero_grad()
 
-            _, _, source_features = generator(source_images)
+            # _, _, source_features = generator(source_images)
             _, _, target_features = generator(target_images)
 
             # discrim_from_gen_source = discriminator(source_features)
@@ -232,7 +238,7 @@ def train_adversarial_uda():
 
         # test Validation of model on rest of training set
         train_iou = []
-        for (input, labels) in tqdm(source_iterator):
+        for (input, labels) in tqdm(source_dl_val):
             input = input.to(DEVICE)
             labels = labels.to(DEVICE)
             optimizer_generator.zero_grad()

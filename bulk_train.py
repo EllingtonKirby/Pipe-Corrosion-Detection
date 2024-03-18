@@ -13,10 +13,10 @@ if __name__ == '__main__':
     dataframe = build_dataframe(use_processed_images=False, limit_well_number=None)
 
     print("-"*100)
-    print("UNet With Tau 2, Gamma None")
+    print("R2U 50 Epochs")
     print("-"*100)
     tau = 2
-    train_dl, _ = build_dataloaders_weighted(tau=tau, gamma=None, apply_cutout=False)
-    model = unet.UNet(1, 1, n_steps=4, bilinear=False, with_pl=True).to(DEVICE)
-    model, tloss, tiou, _, _ = train_unet.train_local_weighted(model, train_dl, None, lr=0.001, num_epochs=100)
-    torch.save(model.state_dict(), './unet_pl_tau_2_gamma_none_100e.pt')
+    train_dl, _ = build_dataloaders(dataframe, apply_cutout=False)
+    model = r2u_att.R2U_Net(img_ch=1, output_ch=1)
+    model, tloss, tiou, _, _ = train_r2u_att.train_local(model, train_dl, None, lr=0.001, num_epochs=50)
+    torch.save(model.state_dict(), './r2u_e50.pt')
