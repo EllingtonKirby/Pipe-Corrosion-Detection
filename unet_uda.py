@@ -21,8 +21,8 @@ def diff_augment(image, label, flipper):
 
     flip = np.random.randint(2) % 2 == 0
     if (flip):
-        image = torch.flip(image, dims=3)
-        label = torch.flip(image, dims=3)
+        image = flipper(image)
+        label = flipper(label)
 
     return image, label
 
