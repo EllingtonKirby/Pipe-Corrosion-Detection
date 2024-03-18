@@ -45,7 +45,7 @@ class conv_block(nn.Module):
 
 class up_conv_bilinear(nn.Module):
     def __init__(self,ch_in,ch_out):
-        super(up_conv,self).__init__()
+        super(up_conv_bilinear,self).__init__()
         self.up = nn.Sequential(
             nn.Upsample(scale_factor=2),
             nn.Conv2d(ch_in,ch_out,kernel_size=3,stride=1,padding=1,bias=True),
