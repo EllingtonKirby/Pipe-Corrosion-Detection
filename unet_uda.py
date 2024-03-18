@@ -261,4 +261,4 @@ def train_adversarial_uda():
     torch.save(generator.state_dict(), './unet_16_uda_3_augments_only_discrim_target.pt')
     torch.save(discriminator.state_dict(), './discriminator_4.pt')
 
-train_emin_uda()
+train_adversarial_uda()
