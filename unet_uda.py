@@ -224,15 +224,11 @@ def train_adversarial_uda():
             generator_loss_source = adversarial_loss(discrim_from_gen_source, target_labels) * adversarial_weight_source
             generator_loss_target = adversarial_loss(discrim_from_gen_target, source_labels) * adversarial_weight_target
             generator_loss = generator_loss_source + generator_loss_target
-            # generator_loss = generator_loss_target
             generator_losses.append(generator_loss.item())
             generator_loss.backward()
 
-            # generator_accuracy = torch.sum((torch.round(discrim_from_gen_source) == source_labels)) + torch.sum((torch.round(discrim_from_gen_target) == source_labels))
-            generator_accuracy_source_to_targ = torch.sum((torch.round(discrim_from_gen_source) == target_labels)).item()
-            generator_accuracy_targ_to_source = torch.sum((torch.round(discrim_from_gen_target) == source_labels)).item()
-            # generator_accuracy = generator_accuracy.item()
-            # generator_accuracy /= (len(target_labels) + len(source_labels))
+            generator_accuracy_source_to_targ = torch.sum((torch.round(discrim_from_gen_source).squeeze() == target_labels.squeeze())).item()
+            generator_accuracy_targ_to_source = torch.sum((torch.round(discrim_from_gen_target).squeeze() == source_labels.squeeze())).item()
             generator_accuracy_source_to_targ /= (len(target_labels))
             generator_accuracy_targ_to_source /= (len(target_labels))
             generator_source_to_targ_accs.append(generator_accuracy_source_to_targ)
@@ -241,19 +237,20 @@ def train_adversarial_uda():
             optimizer_generator.step()
 
         # test Validation of model on rest of training set
-        # train_iou = []
-        # for (input, labels) in tqdm(source_dl_val):
-        #     input = input.to(DEVICE)
-        #     labels = labels.to(DEVICE)
-        #     optimizer_generator.zero_grad()
-        #     preds,pseudo_label,_ = generator(input)
+        train_iou = []
+        with torch.no_grad():
+            for (input, labels) in tqdm(source_dl_val):
+                input = input.to(DEVICE)
+                labels = labels.to(DEVICE)
+                # optimizer_generator.zero_grad()
+                preds,pseudo_label,_ = generator(input)
 
-        #     dice_loss = dice_criterion(preds, labels, weights=None)
-        #     class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
-        #     loss = dice_loss + class_loss
-        #     loss.backward()
-        #     train_iou.append(metric(preds, labels).item())
-        #     optimizer_generator.step()
+                # dice_loss = dice_criterion(preds, labels, weights=None)
+                # class_loss = pseudo_labeling_criterion(pseudo_label, labels, weights=None)
+                # loss = dice_loss + class_loss
+                # loss.backward()
+                train_iou.append(metric(preds, labels).item())
+                # optimizer_generator.step()
 
 
         print("-"*100)
