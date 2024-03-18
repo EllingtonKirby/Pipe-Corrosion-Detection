@@ -263,7 +263,7 @@ def train_adversarial_uda():
         print(f"Discrim on Target:                   {np.mean(discriminator_target_accs)}")
         print(f"Generator tricking source as target: {np.mean(generator_source_to_targ_accs)}")
         print(f"Generator tricking target as source: {np.mean(generator_targ_to_source_accs)}")
-        # print(f"Generator train IoU:                 {np.mean(train_iou)}")
+        print(f"Generator train IoU:                 {np.mean(train_iou)}")
 
 
     torch.save(generator.state_dict(), './unet_16_uda_5_augments_no_val.pt')
