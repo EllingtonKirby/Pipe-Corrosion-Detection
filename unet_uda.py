@@ -65,10 +65,10 @@ X_test, X_names, X_train, Y_train = build_tensors(test_df, train_df)
 target_dataset = data_pipeline.WellsDataset(X_test, torch.zeros(len(X_test), 1, 36, 36), transform=diff_augment, wells=None)
 target_dl = DataLoader(target_dataset, batch_size=128)
 
-source_dataset = data_pipeline.WellsDataset(X_train, Y_train.float().reshape(-1, 1, 36, 36), transform=diff_augment, wells=None)
+source_dataset = data_pipeline.WellsDataset(X_train[:len(X_test)], Y_train[:len(X_test)].float().reshape(-1, 1, 36, 36), transform=diff_augment, wells=None)
 source_dl = DataLoader(source_dataset, batch_size=128)
 
-source_dataset_val = data_pipeline.WellsDataset(X_train[:len(X_test)], Y_train[:len(X_test)].float().reshape(-1, 1, 36, 36), transform=None, wells=None)
+source_dataset_val = data_pipeline.WellsDataset(X_train[len(X_test):], Y_train[len(X_test):].float().reshape(-1, 1, 36, 36), transform=None, wells=None)
 source_dl_val = DataLoader(source_dataset_val, batch_size=128)
 
 # Define your UNet, discriminator, and optimizer
